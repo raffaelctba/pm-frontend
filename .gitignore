@@ -1,0 +1,13 @@
+.angular
+dist
+node_modules
+.env
+
+# Environment files with secrets (generated at build time in CI/CD)
+src/environments/environment.prod.ts
+src/environments/environment.dev.ts
+
+# Supabase local development files (do not deploy to production)
+supabase/.branches
+supabase/.temp
+supabase/.env

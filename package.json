@@ -1,0 +1,39 @@
+{
+  "name": "myproperty-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "21.1.4",
+    "@angular/common": "21.1.4",
+    "@angular/compiler": "21.1.4",
+    "@angular/core": "21.1.4",
+    "@angular/forms": "21.1.4",
+    "@angular/platform-browser": "21.1.4",
+    "@angular/platform-browser-dynamic": "21.1.4",
+    "@angular/router": "21.1.4",
+    "@stomp/stompjs": "^7.3.0",
+    "keycloak-angular": "^21.0.0",
+    "keycloak-js": "^26.2.3",
+    "rxjs": "7.8.1",
+    "sockjs-client": "^1.6.1",
+    "tailwindcss": "^4.2.0",
+    "tslib": "^2.6.2",
+    "zone.js": "0.15.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "21.1.4",
+    "@angular/cli": "21.1.4",
+    "@tailwindcss/postcss": "^4.2.0",
+    "@angular/compiler-cli": "21.1.4",
+    "@types/sockjs-client": "^1.5.4",
+    "autoprefixer": "^10.4.24",
+    "typescript": "5.9.3"
+  }
+}

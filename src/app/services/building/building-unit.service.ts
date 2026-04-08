@@ -1,0 +1,45 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { Page } from '../../models/page.model';
+import { BuildingUnit, BuildingUnitDetails, BuildingUnitRequest, UnitAssigneeOptions } from '../../models/building/building-unit.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class BuildingUnitService {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = `${environment.apiBaseUrl}/api/buildings`;
+
+  getUnits(buildingId: number, page: number, size: number): Observable<Page<BuildingUnit>> {
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+    return this.http.get<Page<BuildingUnit>>(`${this.apiUrl}/${buildingId}/units`, { params }).pipe(
+      tap((response) => {
+        console.info('[BuildingUnitService] Retrieved units:', response.content.length, 'for building:', buildingId);
+      })
+    );
+  }
+
+  getAssignableUsers(buildingId: number): Observable<UnitAssigneeOptions> {
+    return this.http.get<UnitAssigneeOptions>(`${this.apiUrl}/${buildingId}/units/assignees`);
+  }
+
+  getUnitDetails(buildingId: number, unitId: number): Observable<BuildingUnitDetails> {
+    return this.http.get<BuildingUnitDetails>(`${this.apiUrl}/${buildingId}/units/${unitId}/details`);
+  }
+
+  createUnit(buildingId: number, payload: BuildingUnitRequest): Observable<BuildingUnit> {
+    return this.http.post<BuildingUnit>(`${this.apiUrl}/${buildingId}/units`, payload);
+  }
+
+  updateUnit(buildingId: number, unitId: number, payload: BuildingUnitRequest): Observable<BuildingUnit> {
+    return this.http.put<BuildingUnit>(`${this.apiUrl}/${buildingId}/units/${unitId}`, payload);
+  }
+
+  deleteUnit(buildingId: number, unitId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${buildingId}/units/${unitId}`);
+  }
+}
+
+

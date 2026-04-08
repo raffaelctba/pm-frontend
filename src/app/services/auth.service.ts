@@ -40,8 +40,9 @@ export class AuthService {
     this.keycloak.logout({ redirectUri: window.location.origin });
   }
 
-  login(): void {
-    this.keycloak.login({ redirectUri: `${window.location.origin}/dashboard` });
+  login(redirectPath: string = '/dashboard'): void {
+    const sanitizedPath = redirectPath.startsWith('/') ? redirectPath : `/${redirectPath}`;
+    this.keycloak.login({ redirectUri: `${window.location.origin}${sanitizedPath}` });
   }
 
   signUp(payload: SignupRequest): Observable<SignupResponse> {

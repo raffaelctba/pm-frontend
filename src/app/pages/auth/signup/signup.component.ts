@@ -137,6 +137,7 @@ export class SignupComponent {
         this.successMessage = `${response.message}. You can now login.`;
         this.signupForm.reset();
         this.submitting = false;
+        window.setTimeout(() => this.login(), 800);
       },
       error: (error) => {
         this.errorMessage = error?.error?.message ?? 'Could not create account. Please try again.';

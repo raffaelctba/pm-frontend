@@ -2,15 +2,30 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PropertyService } from '../../services/property.service';
+import { DashboardContextService } from '../../services/dashboard-context.service';
+import { I18nService } from '../../services/i18n.service';
 import { Property } from '../../models/property.model';
+import { BuildingSummaryWidgetComponent } from './building-summary-widget.component';
+import { getPropertyRoleLabelKey } from '../../shared/utils/property-role-i18n.util';
+import { canEditPropertyByRole } from '../../shared/utils/property-permissions.util';
+
+interface DashboardPropertyViewModel extends Property {
+  canManage: boolean;
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BuildingSummaryWidgetComponent],
   template: `
     <div class="px-4 py-6">
-      <h1 class="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ i18n.translate('dashboard.globalTitle') }}</h1>
+      <p class="mb-8 text-sm text-gray-600">{{ i18n.translate('dashboard.globalSubtitle') }}</p>
+
+      <!-- Building Management Section -->
+      <div class="mb-8">
+        <app-building-summary-widget></app-building-summary-widget>
+      </div>
 
       <!-- Statistics -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -63,15 +78,21 @@ import { Property } from '../../models/property.model';
         </div>
 
         <div *ngIf="!loading && properties.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div *ngFor="let property of properties" class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow">
+            <div *ngFor="let property of properties" class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow">
             <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ property.name }}</h3>
             <p class="text-sm text-gray-600 mb-2">{{ property.propertyType }}</p>
+              <p class="text-xs text-primary-700 font-medium mb-2">
+                {{ i18n.translate('property.role.label') }}: {{ i18n.translate(getRoleLabelKey(property.currentUserRole)) }}
+              </p>
+              <p class="text-xs font-medium mb-2" [ngClass]="property.isBuilding ? 'text-indigo-600' : 'text-emerald-600'">
+                {{ property.isBuilding ? 'Building management workspace' : 'Private property workspace' }}
+              </p>
             <p class="text-sm text-gray-500 mb-4" *ngIf="property.address">
               {{ property.address.city }}, {{ property.address.state }}
             </p>
             <div class="flex justify-between">
-              <a [routerLink]="['/properties', property.id]" class="text-primary-600 hover:text-primary-800 text-sm font-medium">
-                Ver Detalhes
+              <a [routerLink]="['/property', property.id]" class="text-primary-600 hover:text-primary-800 text-sm font-medium">
+                {{ i18n.translate('dashboard.openPropertyDashboard') }}
               </a>
               <span [ngClass]="{
                 'bg-green-100 text-green-800': property.status === 'ACTIVE',
@@ -89,25 +110,42 @@ import { Property } from '../../models/property.model';
   `
 })
 export class DashboardComponent implements OnInit {
-  properties: Property[] = [];
+  properties: DashboardPropertyViewModel[] = [];
   loading = true;
 
-  constructor(private propertyService: PropertyService) {}
+  constructor(
+    private propertyService: PropertyService,
+    private dashboardContext: DashboardContextService,
+    public i18n: I18nService
+  ) {}
 
   ngOnInit(): void {
+    this.dashboardContext.setGlobal();
     this.loadProperties();
   }
 
   loadProperties(): void {
     this.propertyService.getMyProperties().subscribe({
       next: (data) => {
-        this.properties = data;
-        this.loading = false;
+        // Some providers can emit synchronously on init; defer state update to avoid NG0100 in dev mode.
+        queueMicrotask(() => {
+          this.properties = data.map((property) => ({
+            ...property,
+            canManage: canEditPropertyByRole(Boolean(property.isBuilding), property.currentUserRole)
+          }));
+          this.loading = false;
+        });
       },
       error: (error) => {
         console.error('Error loading properties:', error);
-        this.loading = false;
+        queueMicrotask(() => {
+          this.loading = false;
+        });
       }
     });
+  }
+
+  getRoleLabelKey(role?: string): string {
+    return getPropertyRoleLabelKey(role);
   }
 }

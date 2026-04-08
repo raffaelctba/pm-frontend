@@ -25,11 +25,20 @@ export interface Property {
   parkingSpaces?: number;
   isBuilding: boolean;
   totalUnits?: number;
+  currentUserRole?: string;
   monthlyFee?: number;
   currencyCode?: string;
   dueDay?: number;
   lateFeePercentage?: number;
   interestRateMonthly?: number;
+  billing?: PropertyBilling;
+}
+
+export interface PropertyLinkedUser {
+  userId: number;
+  fullName: string;
+  email: string;
+  role: string;
 }
 
 export interface PropertyDTO {
@@ -49,6 +58,21 @@ export interface PropertyDTO {
   dueDay?: number;
   lateFeePercentage?: number;
   interestRateMonthly?: number;
+  billing?: PropertyBilling;
+}
+
+export interface PropertyBilling {
+  id?: number;
+  propertyId?: number;
+  monthlyFee?: number;
+  currencyCode?: string;
+  dueDay?: number;
+  lateFeePercentage?: number;
+  interestRateMonthly?: number;
+  gracePeriodDays?: number;
+  autoGenerateInvoices?: boolean;
+  isActive?: boolean;
+  notes?: string;
 }
 
 export enum PropertyType {

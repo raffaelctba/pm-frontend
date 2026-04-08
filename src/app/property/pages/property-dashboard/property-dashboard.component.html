@@ -1,0 +1,29 @@
+<div class="px-4 py-6" *ngIf="state$ | async as state">
+  <div *ngIf="state.loading" class="mb-4">
+    <app-loader text="Loading property dashboard..."></app-loader>
+  </div>
+
+  <div
+    *ngIf="!state.loading && state.dashboardVm?.health?.degraded"
+    class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+  >
+    {{ state.dashboardVm?.health?.message }}
+    <span *ngIf="state.dashboardVm?.health?.sources?.length" class="ml-1 text-xs text-amber-700">
+      ({{ state.dashboardVm?.health?.sources?.join(', ') }})
+    </span>
+  </div>
+
+  <div class="space-y-6" *ngIf="!state.loading">
+    <app-property-header [header]="state.dashboardVm?.header ?? null"></app-property-header>
+    <app-property-summary-cards [summary]="state.dashboardVm?.summary ?? null"></app-property-summary-cards>
+
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div class="xl:col-span-2">
+        <app-property-tabs [propertyId]="state.dashboardVm?.id ?? null" [dashboard]="state.dashboardVm"></app-property-tabs>
+      </div>
+      <app-property-sidebar [sidebar]="state.dashboardVm?.sidebar ?? null"></app-property-sidebar>
+    </div>
+  </div>
+</div>
+
+

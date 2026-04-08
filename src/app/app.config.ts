@@ -1,14 +1,34 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
-import { provideKeycloak } from 'keycloak-angular';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import {
+  INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
+  includeBearerTokenInterceptor,
+  provideKeycloak
+} from 'keycloak-angular';
 import { routes } from './app.routes';
+import { sessionAuthInterceptor } from './interceptors/session-auth.interceptor';
 import { environment } from '../environments/environment';
+
+// Match all API requests to the configured backend server (required for Keycloak bearer token)
+const backendApiPattern = new RegExp(
+  `^${environment.apiBaseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\/api\\/.*`
+);
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(),
+    provideAnimationsAsync(),
+    provideHttpClient(withInterceptors([includeBearerTokenInterceptor, sessionAuthInterceptor])),
+    {
+      provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
+      useValue: [
+        {
+          urlPattern: backendApiPattern
+        }
+      ]
+    },
     provideKeycloak({
       config: {
         url: environment.keycloakUrl,

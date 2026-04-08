@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { PropertyService } from '../../../services/property.service';
 import { AddressService } from '../../../services/address.service';
 import { CurrencyService } from '../../../services/currency.service';
-import { PropertyType, PropertyStatus } from '../../../models/property.model';
+import { I18nService } from '../../../services/i18n.service';
 import { AddressConfig } from '../../../models/address.model';
+import { PropertyDTO } from '../../../models/property.model';
 
 @Component({
   selector: 'app-property-form',
@@ -15,52 +17,52 @@ import { AddressConfig } from '../../../models/address.model';
   template: `
     <div class="px-4 py-6 max-w-4xl mx-auto">
       <h1 class="text-3xl font-bold text-gray-900 mb-8">
-        {{ isEditMode ? 'Editar Propriedade' : 'Nova Propriedade' }}
+        {{ isEditMode ? i18n.translate('common.edit') + ' ' + i18n.translate('property.workspace.propertySummary') : i18n.translate('common.create') + ' ' + i18n.translate('property.workspace.propertySummary') }}
       </h1>
 
       <form [formGroup]="propertyForm" (ngSubmit)="onSubmit()" class="card space-y-6">
         <!-- Basic Information -->
         <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Informações Básicas</h2>
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ i18n.translate('property.workspace.propertySummary') }}</h2>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="label">Nome *</label>
+              <label class="label">{{ i18n.translate('property.workspace.editProperty') }} *</label>
               <input type="text" formControlName="name" class="input"
                      [class.border-red-500]="propertyForm.get('name')?.invalid && propertyForm.get('name')?.touched">
               <p *ngIf="propertyForm.get('name')?.invalid && propertyForm.get('name')?.touched"
-                 class="text-red-500 text-sm mt-1">Nome é obrigatório</p>
+                 class="text-red-500 text-sm mt-1">{{ i18n.translate('property.workspace.editProperty') }} is required</p>
             </div>
 
             <div>
-              <label class="label">Tipo *</label>
+              <label class="label">{{ i18n.translate('property.workspace.type') }} *</label>
               <select formControlName="propertyType" class="input">
-                <option value="">Selecione...</option>
-                <option value="APARTMENT">Apartamento</option>
-                <option value="HOUSE">Casa</option>
-                <option value="BUILDING">Prédio</option>
-                <option value="COMMERCIAL">Comercial</option>
-                <option value="LAND">Terreno</option>
+                <option value="">{{ i18n.translate('common.optional') }}</option>
+                <option value="APARTMENT">{{ i18n.translate('property.type.apartment') }}</option>
+                <option value="HOUSE">{{ i18n.translate('property.type.house') }}</option>
+                <option value="BUILDING">{{ i18n.translate('property.type.building') }}</option>
+                <option value="COMMERCIAL">{{ i18n.translate('property.type.commercial') }}</option>
+                <option value="LAND">{{ i18n.translate('property.type.land') }}</option>
               </select>
             </div>
 
             <div class="md:col-span-2">
-              <label class="label">Descrição</label>
+              <label class="label">{{ i18n.translate('property.workspace.notes') }}</label>
               <textarea formControlName="description" rows="3" class="input"></textarea>
             </div>
 
             <div>
-              <label class="label">Status</label>
+              <label class="label">{{ i18n.translate('property.workspace.status') }}</label>
               <select formControlName="status" class="input">
-                <option value="ACTIVE">Ativo</option>
-                <option value="INACTIVE">Inativo</option>
-                <option value="MAINTENANCE">Manutenção</option>
-                <option value="SOLD">Vendido</option>
+                <option value="ACTIVE">{{ i18n.translate('property.status.active') }}</option>
+                <option value="INACTIVE">{{ i18n.translate('property.status.inactive') }}</option>
+                <option value="MAINTENANCE">{{ i18n.translate('property.status.maintenance') }}</option>
+                <option value="SOLD">{{ i18n.translate('property.status.sold') }}</option>
               </select>
             </div>
 
             <div>
-              <label class="label">É um prédio?</label>
+              <label class="label">{{ i18n.translate('property.workspace.buildingOperations') }}?</label>
               <input type="checkbox" formControlName="isBuilding" class="h-5 w-5 text-primary-600">
             </div>
           </div>
@@ -68,15 +70,15 @@ import { AddressConfig } from '../../../models/address.model';
 
         <!-- Address -->
         <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Endereço</h2>
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ i18n.translate('property.workspace.address') }}</h2>
 
           <div formGroupName="address" class="space-y-4">
             <!-- Country Selection -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="label">País *</label>
+                <label class="label">{{ i18n.translate('property.workspace.address') }} *</label>
                 <select formControlName="country" (change)="onCountryChange()" class="input">
-                  <option value="">Selecione...</option>
+                  <option value="">{{ i18n.translate('common.optional') }}</option>
                   <option *ngFor="let country of countries | keyvalue" [value]="country.key">
                     {{ country.value }}
                   </option>
@@ -84,7 +86,7 @@ import { AddressConfig } from '../../../models/address.model';
               </div>
 
               <div>
-                <label class="label">{{ countryConfig?.zipCodeLabel || 'CEP' }} *</label>
+                <label class="label">{{ countryConfig?.zipCodeLabel || 'ZIP' }} *</label>
                 <div class="flex gap-2">
                   <input type="text" formControlName="zipCode" class="input flex-1"
                          [placeholder]="getZipCodePlaceholder()"
@@ -92,7 +94,7 @@ import { AddressConfig } from '../../../models/address.model';
                   <button type="button" (click)="autoFillAddress()"
                           [disabled]="!canAutoFill()"
                           class="btn btn-secondary whitespace-nowrap">
-                    {{ loadingAddress ? 'Buscando...' : 'Buscar' }}
+                    {{ loadingAddress ? i18n.translate('common.loading') : i18n.translate('common.refresh') }}
                   </button>
                 </div>
                 <p *ngIf="addressError" class="text-red-500 text-sm mt-1">{{ addressError }}</p>
@@ -101,39 +103,39 @@ import { AddressConfig } from '../../../models/address.model';
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="label">{{ countryConfig?.streetLabel || 'Rua' }}</label>
+                <label class="label">{{ countryConfig?.streetLabel || i18n.translate('property.workspace.address') }}</label>
                 <input type="text" formControlName="street" class="input">
               </div>
 
               <div>
-                <label class="label">{{ countryConfig?.numberLabel || 'Número' }}</label>
+                <label class="label">{{ countryConfig?.numberLabel || 'No.' }}</label>
                 <input type="text" formControlName="number" class="input">
               </div>
 
               <div>
-                <label class="label">{{ countryConfig?.complementLabel || 'Complemento' }}</label>
+                <label class="label">{{ countryConfig?.complementLabel || 'Complement' }}</label>
                 <input type="text" formControlName="complement" class="input">
               </div>
 
               <div>
-                <label class="label">{{ countryConfig?.neighborhoodLabel || 'Bairro' }}</label>
+                <label class="label">{{ countryConfig?.neighborhoodLabel || 'Neighborhood' }}</label>
                 <input type="text" formControlName="neighborhood" class="input">
               </div>
 
               <div>
-                <label class="label">{{ countryConfig?.cityLabel || 'Cidade' }} *</label>
+                <label class="label">{{ countryConfig?.cityLabel || 'City' }} *</label>
                 <input type="text" formControlName="city" class="input"
                        [class.border-red-500]="propertyForm.get('address.city')?.invalid && propertyForm.get('address.city')?.touched">
                 <p *ngIf="propertyForm.get('address.city')?.invalid && propertyForm.get('address.city')?.touched"
-                   class="text-red-500 text-sm mt-1">{{ countryConfig?.cityLabel || 'Cidade' }} é obrigatório</p>
+                   class="text-red-500 text-sm mt-1">{{ countryConfig?.cityLabel || 'City' }} is required</p>
               </div>
 
               <div>
-                <label class="label">{{ countryConfig?.stateLabel || 'Estado' }} *</label>
+                <label class="label">{{ countryConfig?.stateLabel || 'State' }} *</label>
                 <input type="text" formControlName="state" class="input"
                        [class.border-red-500]="propertyForm.get('address.state')?.invalid && propertyForm.get('address.state')?.touched">
                 <p *ngIf="propertyForm.get('address.state')?.invalid && propertyForm.get('address.state')?.touched"
-                   class="text-red-500 text-sm mt-1">{{ countryConfig?.stateLabel || 'Estado' }} é obrigatório</p>
+                   class="text-red-500 text-sm mt-1">{{ countryConfig?.stateLabel || 'State' }} is required</p>
               </div>
             </div>
           </div>
@@ -141,26 +143,26 @@ import { AddressConfig } from '../../../models/address.model';
 
         <!-- Property Details -->
         <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Detalhes da Propriedade</h2>
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ i18n.translate('property.workspace.propertySummary') }}</h2>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="label">Área (m²)</label>
+              <label class="label">Area (m²)</label>
               <input type="number" formControlName="areaSize" class="input">
             </div>
 
             <div>
-              <label class="label">Quartos</label>
+              <label class="label">{{ i18n.translate('property.workspace.bedrooms') }}</label>
               <input type="number" formControlName="bedrooms" class="input">
             </div>
 
             <div>
-              <label class="label">Banheiros</label>
+              <label class="label">{{ i18n.translate('property.workspace.bathrooms') }}</label>
               <input type="number" formControlName="bathrooms" class="input">
             </div>
 
             <div>
-              <label class="label">Vagas de Estacionamento</label>
+              <label class="label">{{ i18n.translate('property.workspace.parkingSpaces') }}</label>
               <input type="number" formControlName="parkingSpaces" class="input">
             </div>
           </div>
@@ -168,43 +170,47 @@ import { AddressConfig } from '../../../models/address.model';
 
         <!-- Building Details -->
         <div *ngIf="propertyForm.get('isBuilding')?.value">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Configurações do Prédio</h2>
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ i18n.translate('property.workspace.buildingManagement') }}</h2>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="label">Total de Unidades</label>
+              <label class="label">{{ i18n.translate('property.workspace.totalUnits') }}</label>
               <input type="number" formControlName="totalUnits" class="input">
             </div>
 
             <div>
-              <label class="label">Taxa Mensal</label>
+              <label class="label">{{ i18n.translate('property.workspace.monthlyFee') }}</label>
               <input type="number" formControlName="monthlyFee" class="input" step="0.01">
             </div>
 
             <div>
-              <label class="label">Dia de Vencimento</label>
+              <label class="label">{{ i18n.translate('property.workspace.dueDay') }}</label>
               <input type="number" formControlName="dueDay" class="input" min="1" max="31">
             </div>
 
             <div>
-              <label class="label">Taxa de Multa (%)</label>
+              <label class="label">{{ i18n.translate('property.workspace.penaltyRules') }} (%)</label>
               <input type="number" formControlName="lateFeePercentage" class="input" step="0.01">
             </div>
 
             <div>
-              <label class="label">Juros Mensal (%)</label>
+              <label class="label">{{ i18n.translate('building.finance.paidAmount') }} (%)</label>
               <input type="number" formControlName="interestRateMonthly" class="input" step="0.01">
             </div>
           </div>
         </div>
 
         <!-- Actions -->
+        <div *ngIf="submitError" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {{ submitError }}
+        </div>
+
         <div class="flex justify-end space-x-4 pt-6 border-t">
           <button type="button" (click)="cancel()" class="btn btn-secondary">
-            Cancelar
+            {{ i18n.translate('building.units.cancel') }}
           </button>
           <button type="submit" [disabled]="propertyForm.invalid || saving" class="btn btn-primary">
-            {{ saving ? 'Salvando...' : 'Salvar' }}
+            {{ saving ? i18n.translate('common.loading') : i18n.translate('common.save') }}
           </button>
         </div>
       </form>
@@ -218,8 +224,10 @@ export class PropertyFormComponent implements OnInit {
   saving = false;
   loadingAddress = false;
   addressError: string | null = null;
+  submitError: string | null = null;
   countries: {[key: string]: string} = {};
   countryConfig: AddressConfig | null = null;
+  readonly i18n = inject(I18nService);
 
   constructor(
     private fb: FormBuilder,
@@ -280,6 +288,7 @@ export class PropertyFormComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading countries:', error);
+        this.addressError = 'Nao foi possivel carregar a lista de paises.';
       }
     });
   }
@@ -291,6 +300,8 @@ export class PropertyFormComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading country config:', error);
+        this.countryConfig = null;
+        this.addressError = 'Nao foi possivel carregar a configuracao de endereco para este pais.';
       }
     });
   }
@@ -367,7 +378,13 @@ export class PropertyFormComponent implements OnInit {
   canAutoFill(): boolean {
     const zipCode = this.propertyForm.get('address.zipCode')?.value;
     const countryCode = this.propertyForm.get('address.country')?.value;
-    return !!(zipCode && countryCode && this.countryConfig?.autoFillSupported && !this.loadingAddress);
+
+    if (!zipCode || !countryCode || this.loadingAddress) {
+      return false;
+    }
+
+    // Keep the button available when config failed to load; backend validation still applies.
+    return this.countryConfig ? this.countryConfig.autoFillSupported : true;
   }
 
   getZipCodePlaceholder(): string {
@@ -389,7 +406,19 @@ export class PropertyFormComponent implements OnInit {
     if (this.propertyId) {
       this.propertyService.getPropertyById(this.propertyId).subscribe({
         next: (property) => {
-          this.propertyForm.patchValue(property);
+          const billing = property.billing;
+          this.propertyForm.patchValue({
+            ...property,
+            address: {
+              ...property.address,
+              country: property.address?.countryCode || 'BR'
+            },
+            monthlyFee: billing?.monthlyFee ?? property.monthlyFee ?? null,
+            currencyCode: billing?.currencyCode ?? property.currencyCode ?? 'BRL',
+            dueDay: billing?.dueDay ?? property.dueDay ?? null,
+            lateFeePercentage: billing?.lateFeePercentage ?? property.lateFeePercentage ?? null,
+            interestRateMonthly: billing?.interestRateMonthly ?? property.interestRateMonthly ?? null
+          });
         },
         error: (error) => {
           console.error('Error loading property:', error);
@@ -401,8 +430,9 @@ export class PropertyFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.propertyForm.valid) {
+      this.submitError = null;
       this.saving = true;
-      const propertyData = this.propertyForm.value;
+      const propertyData = this.buildPropertyPayload();
 
       const request = this.isEditMode && this.propertyId
         ? this.propertyService.updateProperty(this.propertyId, propertyData)
@@ -414,11 +444,100 @@ export class PropertyFormComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error saving property:', error);
-          alert('Erro ao salvar propriedade');
+          this.submitError = this.extractErrorMessage(error, 'Nao foi possivel salvar a propriedade. Verifique os dados e tente novamente.');
           this.saving = false;
         }
       });
     }
+  }
+
+  private buildPropertyPayload(): PropertyDTO {
+    const formValue = this.propertyForm.getRawValue();
+    const billing = this.hasBillingConfig(formValue)
+      ? {
+          monthlyFee: this.toNumberOrUndefined(formValue.monthlyFee),
+          currencyCode: formValue.currencyCode || 'BRL',
+          dueDay: this.toNumberOrUndefined(formValue.dueDay),
+          lateFeePercentage: this.toNumberOrUndefined(formValue.lateFeePercentage),
+          interestRateMonthly: this.toNumberOrUndefined(formValue.interestRateMonthly)
+        }
+      : undefined;
+
+    return {
+      name: formValue.name,
+      description: formValue.description,
+      propertyType: formValue.propertyType,
+      status: formValue.status,
+      address: {
+        street: formValue.address?.street,
+        number: formValue.address?.number,
+        complement: formValue.address?.complement,
+        neighborhood: formValue.address?.neighborhood,
+        city: formValue.address?.city,
+        state: formValue.address?.state,
+        zipCode: formValue.address?.zipCode,
+        countryCode: formValue.address?.country || 'BR'
+      },
+      areaSize: this.toNumberOrUndefined(formValue.areaSize),
+      bedrooms: this.toNumberOrUndefined(formValue.bedrooms),
+      bathrooms: this.toNumberOrUndefined(formValue.bathrooms),
+      parkingSpaces: this.toNumberOrUndefined(formValue.parkingSpaces),
+      isBuilding: !!formValue.isBuilding,
+      totalUnits: this.toNumberOrUndefined(formValue.totalUnits),
+      billing
+    };
+  }
+
+  private hasBillingConfig(formValue: any): boolean {
+    return [
+      formValue.monthlyFee,
+      formValue.currencyCode,
+      formValue.dueDay,
+      formValue.lateFeePercentage,
+      formValue.interestRateMonthly
+    ].some((value) => value !== null && value !== undefined && `${value}`.trim() !== '');
+  }
+
+  private toNumberOrUndefined(value: unknown): number | undefined {
+    if (value === null || value === undefined || value === '') {
+      return undefined;
+    }
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  private extractErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof HttpErrorResponse) {
+      const payload = error.error;
+
+      if (typeof payload === 'string' && payload.trim()) {
+        return payload;
+      }
+
+      if (payload && typeof payload === 'object') {
+        const backendMessage = payload['message'] ?? payload['error_description'] ?? payload['detail'];
+        if (typeof backendMessage === 'string' && backendMessage.trim()) {
+          return backendMessage;
+        }
+
+        const validationErrors = payload['errors'];
+        if (Array.isArray(validationErrors) && validationErrors.length > 0) {
+          const first = validationErrors[0];
+          if (typeof first === 'string' && first.trim()) {
+            return first;
+          }
+          if (first && typeof first === 'object' && typeof first['message'] === 'string' && first['message'].trim()) {
+            return first['message'];
+          }
+        }
+      }
+
+      if (error.status === 0) {
+        return 'Nao foi possivel conectar ao servidor. Verifique sua conexao e tente novamente.';
+      }
+    }
+
+    return fallback;
   }
 
   cancel(): void {

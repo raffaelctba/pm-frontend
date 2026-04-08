@@ -1,0 +1,36 @@
+<div class="px-4 py-6">
+  <app-portfolio-header></app-portfolio-header>
+
+  <div *ngIf="loading" class="mb-4">
+    <app-loader text="Loading portfolio dashboard..."></app-loader>
+  </div>
+
+  <div
+    *ngIf="!loading && dashboardVm?.health?.degraded"
+    class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+  >
+    {{ dashboardVm?.health?.message }}
+    <span *ngIf="dashboardVm?.health?.sources?.length" class="ml-1 text-xs text-amber-700">
+      ({{ dashboardVm?.health?.sources?.join(', ') }})
+    </span>
+  </div>
+
+  <app-portfolio-summary-cards [stats]="dashboardVm?.stats ?? null"></app-portfolio-summary-cards>
+
+  <div class="mt-6">
+    <app-properties-list [properties]="dashboardVm?.properties ?? []"></app-properties-list>
+  </div>
+
+  <div class="mt-6">
+    <app-portfolio-financial-charts [stats]="dashboardVm?.stats ?? null"></app-portfolio-financial-charts>
+  </div>
+
+  <div class="mt-6">
+    <app-portfolio-maintenance
+      [stats]="dashboardVm?.stats ?? null"
+      [recentActivity]="dashboardVm?.recentActivity ?? []"
+    ></app-portfolio-maintenance>
+  </div>
+</div>
+
+

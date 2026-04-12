@@ -19,8 +19,8 @@ export interface BuildingFinanceInvoice {
 }
 
 export interface BuildingFinanceInvoiceRequest {
-  userId: number;
-  unitId?: number | null;
+  unitId: number;
+  userId?: number | null;
   description?: string | null;
   amount: number;
   dueDate: string;

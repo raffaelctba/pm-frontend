@@ -52,4 +52,8 @@ export class AuthService {
   getUsername(): string {
     return this.keycloak.tokenParsed?.['preferred_username'] ?? '';
   }
+
+  getSubject(): string {
+    return this.keycloak.tokenParsed?.['sub'] ?? '';
+  }
 }

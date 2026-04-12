@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { I18nService } from '../../services/i18n.service';
 
 @Component({
   selector: 'app-landing-home',
@@ -15,34 +16,34 @@ import { AuthService } from '../../services/auth.service';
       <div class="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
         <div>
           <p class="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-700">
-            Smart Property Management
+            {{ i18n.translate('landing.badge') }}
           </p>
 
           <h2 class="mt-4 text-3xl font-bold leading-tight text-slate-900 md:text-5xl">
-            Operate your real estate business with confidence
+            {{ i18n.translate('landing.title') }}
           </h2>
 
           <p class="mt-4 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg">
-            MyProperty centralizes portfolio management, billing, and tenant communication into one secure platform so your team can move faster and stay in control.
+            {{ i18n.translate('landing.subtitle') }}
           </p>
 
           <div class="mt-8 flex flex-wrap gap-3">
-            <button (click)="login()" class="btn btn-primary">Login</button>
-            <a routerLink="/signup" class="btn btn-secondary">Sign Up</a>
+            <button (click)="login()" class="btn btn-primary">{{ i18n.translate('nav.login') }}</button>
+            <a routerLink="/signup" class="btn btn-secondary">{{ i18n.translate('nav.signup') }}</a>
           </div>
 
           <div class="mt-8 grid grid-cols-3 gap-3">
             <div class="rounded-lg border border-slate-200 bg-white/80 p-3 shadow-sm">
               <p class="text-xl font-bold text-slate-900">250+</p>
-              <p class="text-xs text-slate-600">Properties managed</p>
+              <p class="text-xs text-slate-600">{{ i18n.translate('landing.metrics.properties') }}</p>
             </div>
             <div class="rounded-lg border border-slate-200 bg-white/80 p-3 shadow-sm">
               <p class="text-xl font-bold text-slate-900">99.9%</p>
-              <p class="text-xs text-slate-600">Platform availability</p>
+              <p class="text-xs text-slate-600">{{ i18n.translate('landing.metrics.availability') }}</p>
             </div>
             <div class="rounded-lg border border-slate-200 bg-white/80 p-3 shadow-sm">
               <p class="text-xl font-bold text-slate-900">24/7</p>
-              <p class="text-xs text-slate-600">Team collaboration</p>
+              <p class="text-xs text-slate-600">{{ i18n.translate('landing.metrics.collaboration') }}</p>
             </div>
           </div>
         </div>
@@ -50,14 +51,14 @@ import { AuthService } from '../../services/auth.service';
         <div class="relative">
           <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
             <div class="mb-4 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-slate-900">Portfolio Overview</h3>
-              <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">Live</span>
+              <h3 class="text-sm font-semibold text-slate-900">{{ i18n.translate('landing.card.title') }}</h3>
+              <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">{{ i18n.translate('landing.card.live') }}</span>
             </div>
 
             <div class="space-y-3">
               <div class="rounded-lg border border-slate-200 p-3">
                 <div class="mb-2 flex items-center justify-between text-xs text-slate-500">
-                  <span>Occupancy</span>
+                  <span>{{ i18n.translate('landing.card.occupancy') }}</span>
                   <span>84%</span>
                 </div>
                 <div class="h-2 rounded-full bg-slate-100">
@@ -67,24 +68,24 @@ import { AuthService } from '../../services/auth.service';
 
               <div class="grid grid-cols-2 gap-3">
                 <div class="rounded-lg border border-slate-200 p-3">
-                  <p class="text-xs text-slate-500">Open invoices</p>
+                  <p class="text-xs text-slate-500">{{ i18n.translate('landing.card.openInvoices') }}</p>
                   <p class="mt-1 text-lg font-semibold text-slate-900">18</p>
                 </div>
                 <div class="rounded-lg border border-slate-200 p-3">
-                  <p class="text-xs text-slate-500">Pending tickets</p>
+                  <p class="text-xs text-slate-500">{{ i18n.translate('landing.card.pendingTickets') }}</p>
                   <p class="mt-1 text-lg font-semibold text-slate-900">6</p>
                 </div>
               </div>
 
               <div class="rounded-lg border border-slate-200 p-3">
-                <p class="text-xs text-slate-500">Message response time</p>
-                <p class="mt-1 text-lg font-semibold text-slate-900">Under 2 hours</p>
+                <p class="text-xs text-slate-500">{{ i18n.translate('landing.card.responseTime') }}</p>
+                <p class="mt-1 text-lg font-semibold text-slate-900">{{ i18n.translate('landing.card.responseTimeValue') }}</p>
               </div>
             </div>
           </div>
 
           <div class="absolute -right-3 -bottom-4 w-28 rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
-            <p class="text-xs text-slate-500">Cash flow</p>
+            <p class="text-xs text-slate-500">{{ i18n.translate('landing.card.cashFlow') }}</p>
             <p class="text-sm font-semibold text-emerald-700">+12.4%</p>
             <svg viewBox="0 0 120 40" class="mt-2 h-8 w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M2 30C18 31 22 11 39 12C56 13 59 31 76 28C92 25 101 14 118 8" stroke="#10B981" stroke-width="3" stroke-linecap="round"/>
@@ -102,9 +103,9 @@ import { AuthService } from '../../services/auth.service';
             <path d="M9 21V12H15V21" stroke="currentColor" stroke-width="1.8"/>
           </svg>
         </div>
-        <h3 class="text-lg font-semibold text-slate-900">Property Operations</h3>
+        <h3 class="text-lg font-semibold text-slate-900">{{ i18n.translate('landing.feature.operations.title') }}</h3>
         <p class="mt-2 text-sm text-slate-600">
-          Organize portfolios, monitor occupancy, and keep all property records in one system.
+          {{ i18n.translate('landing.feature.operations.desc') }}
         </p>
       </article>
 
@@ -116,9 +117,9 @@ import { AuthService } from '../../services/auth.service';
             <path d="M7 14H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </div>
-        <h3 class="text-lg font-semibold text-slate-900">Billing and Invoices</h3>
+        <h3 class="text-lg font-semibold text-slate-900">{{ i18n.translate('landing.feature.billing.title') }}</h3>
         <p class="mt-2 text-sm text-slate-600">
-          Track invoicing status and cash flow with clear financial visibility across properties.
+          {{ i18n.translate('landing.feature.billing.desc') }}
         </p>
       </article>
 
@@ -130,16 +131,19 @@ import { AuthService } from '../../services/auth.service';
             <path d="M9 14.5H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </div>
-        <h3 class="text-lg font-semibold text-slate-900">Tenant Communication</h3>
+        <h3 class="text-lg font-semibold text-slate-900">{{ i18n.translate('landing.feature.communication.title') }}</h3>
         <p class="mt-2 text-sm text-slate-600">
-          Respond faster with integrated messaging and keep a full conversation history.
+          {{ i18n.translate('landing.feature.communication.desc') }}
         </p>
       </article>
     </section>
   `
 })
 export class LandingHomeComponent {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    readonly i18n: I18nService
+  ) {}
 
   login(): void {
     this.authService.login();

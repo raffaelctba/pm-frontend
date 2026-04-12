@@ -1,9 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { I18nService } from '../../../../../services/i18n.service';
 
 @Component({
   selector: 'app-maintenance-list',
   standalone: true,
-  template: '<div class="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">Maintenance list placeholder</div>'
+  template: '<div class="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">{{ i18n.translate(\'property.placeholders.maintenanceList\') }}</div>'
 })
-export class MaintenanceListComponent {}
+export class MaintenanceListComponent {
+  readonly i18n = inject(I18nService);
+}
 

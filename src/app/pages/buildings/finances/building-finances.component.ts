@@ -19,10 +19,13 @@ import {
   BuildingFinanceSummary,
   InvoiceStatus
 } from '../../../models/building/building-finance.model';
+import { BuildingUnit } from '../../../models/building/building-unit.model';
 import { BuildingFinanceService } from '../../../services/building/building-finance.service';
+import { BuildingUnitService } from '../../../services/building/building-unit.service';
 import { I18nService } from '../../../services/i18n.service';
 import { PropertyService } from '../../../services/property.service';
 import { canManageBuildingOperations } from '../../../shared/utils/property-permissions.util';
+import { formatDateInput, parseDisplayDate, formatDisplayDate } from '../../../shared/utils/date-formatter.util';
 
 @Component({
   selector: 'app-building-finances',
@@ -88,9 +91,17 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
       <mat-card class="mb-6 p-4">
         <h2 class="mb-4 text-lg font-semibold">{{ i18n.translate('building.finance.createInvoice') }}</h2>
         <form [formGroup]="form" (ngSubmit)="createInvoice()" class="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <mat-form-field appearance="outline">
-            <mat-label>{{ i18n.translate('building.finance.userId') }}</mat-label>
-            <input matInput type="number" formControlName="userId" />
+          <mat-form-field appearance="outline" class="md:col-span-2">
+            <mat-label>{{ i18n.translate('building.finance.unitId') }}</mat-label>
+            <mat-select formControlName="unitId">
+              <mat-option [value]="null">{{ i18n.translate('common.none') }}</mat-option>
+              @for (unit of invoiceUnits(); track unit.id) {
+                <mat-option [value]="unit.id" [disabled]="!unitRecipientUserId(unit)">
+                  {{ unitInvoiceLabel(unit) }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-hint>{{ i18n.translate('building.finance.unitIdHint') }}</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -100,12 +111,34 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
 
           <mat-form-field appearance="outline">
             <mat-label>{{ i18n.translate('building.finance.dueDate') }}</mat-label>
-            <input matInput type="date" formControlName="dueDate" />
+            <input
+              matInput
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              maxlength="10"
+              placeholder="dd-MM-yyyy"
+              formControlName="dueDate"
+              (input)="onDateInput('create', 'dueDate', $event)"
+              (keydown)="onDateKeyDown($event)"
+              (paste)="onDatePaste('create', 'dueDate', $event)"
+            />
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>{{ i18n.translate('building.finance.referenceMonth') }}</mat-label>
-            <input matInput type="date" formControlName="referenceMonth" />
+            <input
+              matInput
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              maxlength="10"
+              placeholder="dd-MM-yyyy"
+              formControlName="referenceMonth"
+              (input)="onDateInput('create', 'referenceMonth', $event)"
+              (keydown)="onDateKeyDown($event)"
+              (paste)="onDatePaste('create', 'referenceMonth', $event)"
+            />
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="md:col-span-4">
@@ -113,8 +146,26 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
             <input matInput formControlName="description" />
           </mat-form-field>
 
+          @if (selectedInvoiceUnit(); as selectedUnit) {
+            <div class="md:col-span-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ i18n.translate('building.finance.recipientPreview') }}</p>
+              <p class="mt-1 text-sm text-slate-900">{{ unitRecipientPreview(selectedUnit) }}</p>
+              @if (!unitRecipientUserId(selectedUnit)) {
+                <p class="mt-1 text-xs text-amber-700">{{ i18n.translate('building.finance.unitMissingRecipient') }}</p>
+              }
+            </div>
+          }
+
+          @if (invoiceUnitsLoading()) {
+            <p class="md:col-span-4 text-xs text-slate-500">{{ i18n.translate('building.units.loadingUnits') }}</p>
+          }
+
+          @if (invoiceUnitsLoadError()) {
+            <p class="md:col-span-4 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">{{ invoiceUnitsLoadError() }}</p>
+          }
+
           <div class="md:col-span-4 flex justify-end">
-            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading()">{{ i18n.translate('building.finance.createInvoice') }}</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading() || !selectedInvoiceCanBeBilled()">{{ i18n.translate('building.finance.createInvoice') }}</button>
           </div>
         </form>
       </mat-card>
@@ -133,12 +184,34 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
         <form [formGroup]="bulkForm" class="grid grid-cols-1 gap-4 md:grid-cols-3">
           <mat-form-field appearance="outline">
             <mat-label>{{ i18n.translate('building.finance.referenceMonthRequired') }}</mat-label>
-            <input matInput type="date" formControlName="referenceMonth" />
+            <input
+              matInput
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              maxlength="10"
+              placeholder="dd-MM-yyyy"
+              formControlName="referenceMonth"
+              (input)="onDateInput('bulk', 'referenceMonth', $event)"
+              (keydown)="onDateKeyDown($event)"
+              (paste)="onDatePaste('bulk', 'referenceMonth', $event)"
+            />
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>{{ i18n.translate('building.finance.dueDateOptional') }}</mat-label>
-            <input matInput type="date" formControlName="dueDate" />
+            <input
+              matInput
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              maxlength="10"
+              placeholder="dd-MM-yyyy"
+              formControlName="dueDate"
+              (input)="onDateInput('bulk', 'dueDate', $event)"
+              (keydown)="onDateKeyDown($event)"
+              (paste)="onDatePaste('bulk', 'dueDate', $event)"
+            />
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="md:col-span-3">
@@ -184,7 +257,7 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
 
               <ng-container matColumnDef="dueDate">
                 <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.finance.dueDate') }}</th>
-                <td mat-cell *matCellDef="let row">{{ row.dueDate }}</td>
+                <td mat-cell *matCellDef="let row">{{ formatDisplayDate(row.dueDate) }}</td>
               </ng-container>
 
               <ng-container matColumnDef="status">
@@ -224,11 +297,15 @@ export class BuildingFinancesComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(BuildingFinanceService);
+  private readonly unitService = inject(BuildingUnitService);
   private readonly propertyService = inject(PropertyService);
   private readonly snackBar = inject(MatSnackBar);
   readonly i18n = inject(I18nService);
 
   readonly buildingId = signal<number>(0);
+  readonly invoiceUnits = signal<BuildingUnit[]>([]);
+  readonly invoiceUnitsLoading = signal<boolean>(false);
+  readonly invoiceUnitsLoadError = signal<string>('');
   readonly invoices = signal<BuildingFinanceInvoice[]>([]);
   readonly summary = signal<BuildingFinanceSummary | null>(null);
   readonly loading = signal<boolean>(false);
@@ -238,20 +315,21 @@ export class BuildingFinancesComponent implements OnInit {
   readonly totalElements = signal<number>(0);
   readonly statusFilter = signal<InvoiceStatus | ''>('');
   readonly canManageFinances = signal<boolean>(false);
+  private pendingUnitId: number | null = null;
 
   readonly statuses: InvoiceStatus[] = ['PENDING', 'PAID', 'OVERDUE', 'CANCELLED'];
   readonly displayedColumns: string[] = ['invoiceNumber', 'amount', 'dueDate', 'status', 'actions'];
 
   readonly form = this.fb.nonNullable.group({
-    userId: [0, Validators.required],
+    unitId: [null as number | null, Validators.required],
     amount: [0, Validators.required],
-    dueDate: ['', Validators.required],
-    referenceMonth: [''],
+    dueDate: ['', [Validators.required, Validators.pattern(/^\d{2}-\d{2}-\d{4}$/)]],
+    referenceMonth: ['', [Validators.pattern(/^\d{2}-\d{2}-\d{4}$/)]],
     description: ['']
   });
 
   readonly bulkForm = this.fb.nonNullable.group({
-    referenceMonth: ['', Validators.required],
+    referenceMonth: ['', [Validators.required, Validators.pattern(/^\d{2}-\d{2}-\d{4}$/)]],
     dueDate: [''],
     description: ['']
   });
@@ -261,6 +339,13 @@ export class BuildingFinancesComponent implements OnInit {
       ?? this.route.parent?.snapshot.paramMap.get('id')
       ?? '0';
     this.buildingId.set(Number(rawId));
+
+    const rawUnitId = this.route.snapshot.queryParamMap.get('unitId');
+    this.pendingUnitId = rawUnitId ? Number(rawUnitId) : null;
+    if (this.pendingUnitId !== null && Number.isNaN(this.pendingUnitId)) {
+      this.pendingUnitId = null;
+    }
+
     this.loadAccessProfile();
   }
 
@@ -270,12 +355,34 @@ export class BuildingFinancesComponent implements OnInit {
         const canManage = canManageBuildingOperations(property.currentUserRole);
         this.canManageFinances.set(canManage);
         if (canManage) {
+          this.loadInvoiceUnits();
           this.loadSummary();
           this.loadInvoices();
+        } else {
+          this.invoiceUnits.set([]);
+          this.invoiceUnitsLoadError.set('');
         }
       },
       error: () => {
         this.canManageFinances.set(false);
+      }
+    });
+  }
+
+  loadInvoiceUnits(): void {
+    this.invoiceUnitsLoading.set(true);
+    this.invoiceUnitsLoadError.set('');
+
+    this.unitService.getUnits(this.buildingId(), 0, 1000).subscribe({
+      next: (response) => {
+        this.invoiceUnits.set((response.content ?? []).slice().sort((a, b) => a.unitNumber.localeCompare(b.unitNumber, undefined, { numeric: true, sensitivity: 'base' })));
+        this.applyPendingUnitSelection();
+        this.invoiceUnitsLoading.set(false);
+      },
+      error: () => {
+        this.invoiceUnits.set([]);
+        this.invoiceUnitsLoadError.set(this.i18n.translate('building.finance.noUnitsForCreate'));
+        this.invoiceUnitsLoading.set(false);
       }
     });
   }
@@ -314,18 +421,29 @@ export class BuildingFinancesComponent implements OnInit {
       return;
     }
 
+    if (!this.selectedInvoiceCanBeBilled()) {
+      this.errorMessage.set(this.i18n.translate('building.finance.unitNeedsRecipient'));
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const payload = this.form.getRawValue() as BuildingFinanceInvoiceRequest;
+    let payload: BuildingFinanceInvoiceRequest;
+    try {
+      payload = this.buildInvoicePayload();
+    } catch {
+      this.errorMessage.set('Please enter dates in dd-MM-yyyy format.');
+      return;
+    }
     this.loading.set(true);
 
     this.service.createInvoice(this.buildingId(), payload).subscribe({
       next: () => {
         this.snackBar.open(this.i18n.translate('building.finance.created'), this.i18n.translate('common.close'), { duration: 2500 });
-        this.form.patchValue({ description: '', amount: 0 });
+        this.form.patchValue({ unitId: null, description: '', amount: 0 });
         this.loadSummary();
         this.loadInvoices();
       },
@@ -348,7 +466,14 @@ export class BuildingFinancesComponent implements OnInit {
     }
 
     this.loading.set(true);
-    const payload = this.bulkForm.getRawValue() as BuildingBulkInvoiceGenerationRequest;
+    let payload: BuildingBulkInvoiceGenerationRequest;
+    try {
+      payload = this.buildBulkPayload();
+    } catch {
+      this.errorMessage.set('Please enter dates in dd-MM-yyyy format.');
+      this.loading.set(false);
+      return;
+    }
 
     this.service.generateInvoicesForAllUnits(this.buildingId(), payload).subscribe({
       next: (result: BuildingBulkInvoiceGenerationResult) => {
@@ -400,6 +525,134 @@ export class BuildingFinancesComponent implements OnInit {
     this.pageIndex.set(event.pageIndex);
     this.pageSize.set(event.pageSize);
     this.loadInvoices();
+  }
+
+  selectedInvoiceUnit(): BuildingUnit | null {
+    const unitId = this.form.controls.unitId.value;
+    return unitId == null ? null : this.invoiceUnits().find((unit) => unit.id === unitId) ?? null;
+  }
+
+  unitRecipientUserId(unit: BuildingUnit): number | null {
+    return unit.tenantId ?? unit.ownerId ?? null;
+  }
+
+  unitInvoiceLabel(unit: BuildingUnit): string {
+    return `${unit.unitNumber} — ${this.unitRecipientPreview(unit)}`;
+  }
+
+  unitRecipientPreview(unit: BuildingUnit): string {
+    if (unit.tenantId) {
+      return unit.tenantName || unit.tenantEmail || `Tenant #${unit.tenantId}`;
+    }
+
+    if (unit.ownerId) {
+      return unit.ownerName || unit.ownerEmail || `Owner #${unit.ownerId}`;
+    }
+
+    return 'No owner or tenant assigned';
+  }
+
+  selectedInvoiceCanBeBilled(): boolean {
+    const unit = this.selectedInvoiceUnit();
+    return !!unit && !!this.unitRecipientUserId(unit);
+  }
+
+  onDateInput(formName: 'create' | 'bulk', controlName: 'dueDate' | 'referenceMonth', event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    if (!input) {
+      return;
+    }
+
+    const formatted = formatDateInput(input.value);
+    input.value = formatted;
+
+    const control = formName === 'create'
+      ? this.form.controls[controlName]
+      : this.bulkForm.controls[controlName];
+
+    control.setValue(formatted);
+    control.markAsDirty();
+  }
+
+  onDateKeyDown(event: KeyboardEvent): void {
+    const allowedKeys = new Set([
+      'Backspace', 'Delete', 'Tab', 'Enter', 'Escape',
+      'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+      'Home', 'End'
+    ]);
+
+    if (
+      allowedKeys.has(event.key) ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey ||
+      /^\d$/.test(event.key) ||
+      event.key === '-'
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+  }
+
+  onDatePaste(formName: 'create' | 'bulk', controlName: 'dueDate' | 'referenceMonth', event: ClipboardEvent): void {
+    event.preventDefault();
+    const pasted = event.clipboardData?.getData('text') ?? '';
+    const formatted = formatDateInput(pasted);
+
+    const control = formName === 'create'
+      ? this.form.controls[controlName]
+      : this.bulkForm.controls[controlName];
+
+    control.setValue(formatted);
+    control.markAsDirty();
+    control.markAsTouched();
+  }
+
+  formatDisplayDate = formatDisplayDate;
+  private parseDisplayDate = parseDisplayDate;
+
+  private buildInvoicePayload(): BuildingFinanceInvoiceRequest {
+    const raw = this.form.getRawValue();
+    const dueDate = this.parseDisplayDate(raw.dueDate);
+    if (!dueDate) {
+      throw new Error('Invalid due date');
+    }
+
+    return {
+      unitId: raw.unitId as number,
+      amount: raw.amount,
+      dueDate,
+      referenceMonth: this.parseDisplayDate(raw.referenceMonth) ?? undefined,
+      description: raw.description?.trim() || undefined
+    };
+  }
+
+  private buildBulkPayload(): BuildingBulkInvoiceGenerationRequest {
+    const raw = this.bulkForm.getRawValue();
+    const referenceMonth = this.parseDisplayDate(raw.referenceMonth);
+    if (!referenceMonth) {
+      throw new Error('Invalid reference month');
+    }
+
+    return {
+      referenceMonth,
+      dueDate: this.parseDisplayDate(raw.dueDate) ?? undefined,
+      description: raw.description?.trim() || undefined
+    };
+  }
+
+  private applyPendingUnitSelection(): void {
+    if (this.pendingUnitId == null) {
+      return;
+    }
+
+    const match = this.invoiceUnits().find((unit) => unit.id === this.pendingUnitId) ?? null;
+    if (match) {
+      this.form.patchValue({ unitId: match.id });
+    }
+
+    this.pendingUnitId = null;
   }
 }
 

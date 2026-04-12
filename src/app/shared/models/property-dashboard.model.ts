@@ -18,14 +18,12 @@ export interface PropertySidebarVm {
   locationLabel: string;
   upcomingPaymentsLabel: string;
   alertsLabel: string;
-  linkedUsers: PropertyLinkedUserVm[];
-}
-
-export interface PropertyLinkedUserVm {
-  userId: number;
-  fullName: string;
-  email: string;
-  role: string;
+  linkedUsers?: Array<{
+    userId: number;
+    fullName: string;
+    email: string;
+    role?: string;
+  }>;
 }
 
 export interface PropertyOverviewVm {
@@ -53,8 +51,6 @@ export interface PropertyActivityVm {
 
 export interface PropertyDashboardVm {
   id: number;
-  isBuilding: boolean;
-  currentUserRole?: string;
   header: PropertyHeaderVm;
   summary: PropertySummaryCardsVm;
   sidebar: PropertySidebarVm;

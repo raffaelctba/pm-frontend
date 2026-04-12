@@ -129,6 +129,10 @@ interface LeaseDraft {
                   <p class="font-semibold text-slate-900">{{ i18n.translate('property.workspace.documents') }}</p>
                   <p class="mt-1 text-sm text-slate-500">Blueprints, records and building files in one place.</p>
                 </a>
+                <a [routerLink]="['/property', currentProperty.id, 'amenities']" class="rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50">
+                  <p class="font-semibold text-slate-900">Amenities</p>
+                  <p class="mt-1 text-sm text-slate-500">Manage reservations, availability windows and paid amenity workflows.</p>
+                </a>
               </div>
             </div>
 

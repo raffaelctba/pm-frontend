@@ -9,7 +9,7 @@ import { DashboardContextService } from './services/dashboard-context.service';
 import { PropertyService } from './services/property.service';
 import { SessionToastComponent } from './components/session-toast/session-toast.component';
 import { ProfileMenuComponent } from './components/profile-menu/profile-menu.component';
-import { canManageBuildingOperations, isTenantRole } from './shared/utils/property-permissions.util';
+import { canManageBuildingOperations } from './shared/utils/property-permissions.util';
 
 interface PropertySubmenuEntry {
   labelKey: string;
@@ -225,7 +225,6 @@ export class AppComponent {
         return [
           { ...this.buildingSubmenuTemplate[0], link: ['/property', propertyId] },
           { ...this.buildingSubmenuTemplate[3], link: ['/property', propertyId, 'incidents'] },
-          { ...this.buildingSubmenuTemplate[4], link: ['/property', propertyId, 'work-orders'] },
           { ...this.buildingSubmenuTemplate[6], link: ['/property', propertyId, 'documents'] }
         ];
       }
@@ -242,13 +241,6 @@ export class AppComponent {
     }
 
     if (isBuilding === false) {
-      if (isTenantRole(currentUserRole)) {
-        return [
-          { ...this.privateSubmenuTemplate[0], link: ['/property', propertyId], exact: true },
-          { labelKey: 'nav.chat', link: ['/chat'], queryParams: { property: propertyId }, exact: true }
-        ];
-      }
-
       return [
         { ...this.privateSubmenuTemplate[0], link: ['/property', propertyId] },
         { ...this.privateSubmenuTemplate[1], link: ['/property', propertyId, 'workspace'] },

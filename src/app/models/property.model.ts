@@ -34,13 +34,6 @@ export interface Property {
   billing?: PropertyBilling;
 }
 
-export interface PropertyLinkedUser {
-  userId: number;
-  fullName: string;
-  email: string;
-  role: string;
-}
-
 export interface PropertyDTO {
   name: string;
   description?: string;
@@ -71,8 +64,17 @@ export interface PropertyBilling {
   interestRateMonthly?: number;
   gracePeriodDays?: number;
   autoGenerateInvoices?: boolean;
+    autoSendReminders?: boolean;
+    reminderDaysBeforeDue?: number;
   isActive?: boolean;
   notes?: string;
+}
+
+export interface PropertyLinkedUser {
+  userId: number;
+  fullName: string;
+  email: string;
+  role?: string;
 }
 
 export enum PropertyType {

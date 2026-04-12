@@ -17,7 +17,7 @@ import { getPropertyRoleLabelKey } from '../../../../shared/utils/property-role-
           {{ i18n.translate('property.role.label') }}: {{ i18n.translate(getRoleLabelKey(property?.currentUserRole)) }}
         </p>
       </div>
-      <a [routerLink]="['/property', property?.id]" class="text-sm font-medium text-primary-600">Manage</a>
+      <a [routerLink]="['/property', property?.id]" class="text-sm font-medium text-primary-600">{{ i18n.translate('portfolio.properties.manageAction') }}</a>
     </article>
   `
 })

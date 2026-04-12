@@ -33,12 +33,12 @@ interface PropertyCardViewModel {
     <div class="px-4 py-6">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Minhas Propriedades</h1>
-          <p class="mt-1 text-sm text-gray-600">Selecione uma propriedade para abrir o painel de gerenciamento.</p>
-          <p class="mt-1 text-xs text-gray-500">Total carregado: {{ propertiesCount() }}</p>
+          <h1 class="text-3xl font-bold text-gray-900">{{ i18n.translate('dashboard.myPropertiesTitle') }}</h1>
+          <p class="mt-1 text-sm text-gray-600">{{ i18n.translate('dashboard.myPropertiesSubtitle') }}</p>
+          <p class="mt-1 text-xs text-gray-500">{{ i18n.translate('property.list.loadedCountPrefix') }} {{ propertiesCount() }}</p>
         </div>
         <a routerLink="/properties/new" class="btn btn-primary">
-          Nova Propriedade
+          {{ i18n.translate('dashboard.newProperty') }}
         </a>
       </div>
 
@@ -50,15 +50,15 @@ interface PropertyCardViewModel {
 
       @if (loading()) {
         <div class="text-center py-8">
-          <p class="text-gray-500">Carregando...</p>
+          <p class="text-gray-500">{{ i18n.translate('dashboard.loadingProperties') }}</p>
         </div>
       }
 
       @if (!loading() && propertiesCount() === 0) {
         <div class="card text-center py-8">
-          <p class="text-gray-500 mb-4">Nenhuma propriedade encontrada.</p>
+          <p class="text-gray-500 mb-4">{{ i18n.translate('dashboard.noPropertiesYet') }}</p>
           <a routerLink="/properties/new" class="btn btn-primary">
-            Cadastrar Propriedade
+            {{ i18n.translate('dashboard.registerFirstProperty') }}
           </a>
         </div>
       }
@@ -76,7 +76,7 @@ interface PropertyCardViewModel {
               </p>
             </div>
             <span class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="property.isBuilding ? 'bg-indigo-100 text-indigo-800' : 'bg-emerald-100 text-emerald-800'">
-              {{ property.isBuilding ? 'Building' : 'Private property' }}
+              {{ property.isBuilding ? i18n.translate('dashboard.buildingWorkspace') : i18n.translate('dashboard.privateWorkspace') }}
             </span>
             <span [ngClass]="{
               'bg-green-100 text-green-800': property.status === 'ACTIVE',
@@ -89,7 +89,7 @@ interface PropertyCardViewModel {
           </div>
 
           <p class="min-h-12 text-sm text-gray-600">
-            {{ property.description }}
+            {{ property.description || i18n.translate('dashboard.noDescription') }}
           </p>
 
           @if (property.addressLine) {
@@ -99,21 +99,21 @@ interface PropertyCardViewModel {
           }
 
           <div class="mt-4 flex flex-wrap gap-2 text-xs">
-            <span *ngIf="property.bedrooms" class="rounded-full bg-slate-100 px-2 py-1 text-slate-700">{{ property.bedrooms }} quartos</span>
-            <span *ngIf="property.bathrooms" class="rounded-full bg-slate-100 px-2 py-1 text-slate-700">{{ property.bathrooms }} banheiros</span>
-            <span *ngIf="property.parkingSpaces" class="rounded-full bg-slate-100 px-2 py-1 text-slate-700">{{ property.parkingSpaces }} vagas</span>
+            <span *ngIf="property.bedrooms" class="rounded-full bg-slate-100 px-2 py-1 text-slate-700">{{ property.bedrooms }} {{ i18n.translate('property.workspace.bedrooms') }}</span>
+            <span *ngIf="property.bathrooms" class="rounded-full bg-slate-100 px-2 py-1 text-slate-700">{{ property.bathrooms }} {{ i18n.translate('property.workspace.bathrooms') }}</span>
+            <span *ngIf="property.parkingSpaces" class="rounded-full bg-slate-100 px-2 py-1 text-slate-700">{{ property.parkingSpaces }} {{ i18n.translate('property.workspace.parkingSpaces') }}</span>
             <span *ngIf="property.areaSize" class="rounded-full bg-slate-100 px-2 py-1 text-slate-700">{{ property.areaSize }}m²</span>
           </div>
 
           <div class="mt-6 flex gap-2">
             <a [routerLink]="getWorkspaceLink(property)" class="btn btn-primary w-full text-center" [class.opacity-50]="!property.canAccess" [attr.aria-disabled]="!property.canAccess" [style.pointer-events]="property.canAccess ? 'auto' : 'none'">
-              {{ property.isBuilding ? 'Abrir dashboard do prédio' : 'Abrir workspace do imóvel' }}
+              {{ i18n.translate('dashboard.openPropertyDashboard') }}
             </a>
             <a [routerLink]="['/properties', property.id, 'edit']" class="btn btn-secondary" [class.opacity-50]="!property.canManage" [attr.aria-disabled]="!property.canManage" [style.pointer-events]="property.canManage ? 'auto' : 'none'">
-              Editar
+              {{ i18n.translate('common.edit') }}
             </a>
             <button (click)="deleteProperty(property.id)" class="btn btn-danger" [disabled]="!property.canManage">
-              Excluir
+              {{ i18n.translate('building.units.delete') }}
             </button>
           </div>
             </article>
@@ -151,7 +151,7 @@ export class PropertyListComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading properties:', error);
-        this.errorMessage.set(error?.error?.message ?? 'Nao foi possivel carregar suas propriedades.');
+        this.errorMessage.set(error?.error?.message ?? this.i18n.translate('property.list.loadError'));
         this.loading.set(false);
       }
     });
@@ -178,8 +178,8 @@ export class PropertyListComponent implements OnInit {
       canManage,
       isBuilding,
       currentUserRole: property.currentUserRole,
-      name: property.name || 'Propriedade sem nome',
-      description: property.description || 'Sem descricao cadastrada.',
+      name: property.name || this.i18n.translate('property.list.noName'),
+      description: property.description || this.i18n.translate('property.list.noDescription'),
       propertyType: property.propertyType,
       status: property.status,
       addressLine,
@@ -195,38 +195,25 @@ export class PropertyListComponent implements OnInit {
   }
 
   deleteProperty(id: number): void {
-    if (confirm('Tem certeza que deseja excluir esta propriedade?')) {
+    if (confirm(this.i18n.translate('dashboard.deleteConfirm'))) {
       this.propertyService.deleteProperty(id).subscribe({
         next: () => {
           this.loadMyProperties();
         },
         error: (error) => {
           console.error('Error deleting property:', error);
-          alert('Erro ao excluir propriedade');
+          alert(this.i18n.translate('dashboard.deleteError'));
         }
       });
     }
   }
 
   getPropertyTypeLabel(type: string): string {
-    const labels: { [key: string]: string } = {
-      'APARTMENT': 'Apartamento',
-      'HOUSE': 'Casa',
-      'BUILDING': 'Prédio',
-      'COMMERCIAL': 'Comercial',
-      'LAND': 'Terreno'
-    };
-    return labels[type] || type;
+    return this.i18n.translate(`property.type.${(type ?? '').toLowerCase()}`) || type;
   }
 
   getStatusLabel(status: string): string {
-    const labels: { [key: string]: string } = {
-      'ACTIVE': 'Ativo',
-      'INACTIVE': 'Inativo',
-      'MAINTENANCE': 'Manutenção',
-      'SOLD': 'Vendido'
-    };
-    return labels[status] || status;
+    return this.i18n.translate(`property.status.${(status ?? '').toLowerCase()}`) || status;
   }
 
   getRoleLabelKey(role?: string): string {

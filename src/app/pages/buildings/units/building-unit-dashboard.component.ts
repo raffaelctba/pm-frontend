@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { BuildingUnitDetails, InvoiceStatus, UnitStatus } from '../../../models/building/building-unit.model';
+import { BuildingUnitDetails, InvoiceStatus, UnitStatus, UnitTenantContact } from '../../../models/building/building-unit.model';
 import { BuildingUnitService } from '../../../services/building/building-unit.service';
 import { I18nService } from '../../../services/i18n.service';
 
@@ -23,6 +23,14 @@ import { I18nService } from '../../../services/i18n.service';
         </div>
         <div class="flex gap-2">
           <a [routerLink]="['/property', buildingId(), 'units']" mat-stroked-button>{{ i18n.translate('unit.dashboard.backToUnits') }}</a>
+          <a [routerLink]="['/property', buildingId(), 'units', unitId(), 'leases']" mat-stroked-button>Manage lease</a>
+          <a
+            mat-stroked-button
+            [routerLink]="['/property', buildingId(), 'finances']"
+            [queryParams]="{ unitId: unitId() }"
+          >
+            {{ i18n.translate('building.finance.createInvoice') }}
+          </a>
           <button mat-stroked-button (click)="copyDashboardLink()">
             <mat-icon>link</mat-icon>
             {{ i18n.translate('unit.dashboard.copyLink') }}
@@ -83,9 +91,17 @@ import { I18nService } from '../../../services/i18n.service';
           </mat-card>
           <mat-card class="p-4">
             <h3 class="mb-2 text-sm font-semibold text-slate-700">{{ i18n.translate('unit.dashboard.tenantProfile') }}</h3>
-            <p class="text-sm text-slate-900">{{ details.tenantName || i18n.translate('unit.dashboard.notAssigned') }}</p>
-            @if (details.tenantEmail) {
-              <p class="text-xs text-slate-500">{{ details.tenantEmail }}</p>
+            @if (tenantContacts(details).length === 0) {
+              <p class="text-sm text-slate-900">{{ i18n.translate('unit.dashboard.notAssigned') }}</p>
+            } @else {
+              <div class="space-y-1">
+                @for (tenant of tenantContacts(details); track tenant.userId ?? tenant.email ?? $index) {
+                  <p class="text-sm text-slate-900">{{ tenantDisplayLabel(tenant) }}</p>
+                  @if (tenant.name && tenant.email) {
+                    <p class="text-xs text-slate-500">{{ tenant.email }}</p>
+                  }
+                }
+              </div>
             }
           </mat-card>
         </div>
@@ -282,6 +298,23 @@ export class UnitDashboardComponent implements OnInit {
       return '-';
     }
     return new Date(value).toLocaleString();
+  }
+
+  tenantContacts(details: BuildingUnitDetails): UnitTenantContact[] {
+    if (details.tenants && details.tenants.length > 0) {
+      return details.tenants;
+    }
+    if (details.tenantName || details.tenantEmail) {
+      return [{ name: details.tenantName, email: details.tenantEmail }];
+    }
+    return [];
+  }
+
+  tenantDisplayLabel(tenant: UnitTenantContact): string {
+    if (tenant.name && tenant.email) {
+      return tenant.name;
+    }
+    return tenant.name || tenant.email || this.i18n.translate('unit.dashboard.notAssigned');
   }
 
   copyDashboardLink(): void {

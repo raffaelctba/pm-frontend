@@ -2,14 +2,14 @@
   <app-portfolio-header></app-portfolio-header>
 
   <div *ngIf="loading" class="mb-4">
-    <app-loader text="Loading portfolio dashboard..."></app-loader>
+    <app-loader [text]="i18n.translate('common.loadingWorkspace')"></app-loader>
   </div>
 
   <div
     *ngIf="!loading && dashboardVm?.health?.degraded"
     class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
   >
-    {{ dashboardVm?.health?.message }}
+    {{ i18n.translate(dashboardVm?.health?.message ?? '') }}
     <span *ngIf="dashboardVm?.health?.sources?.length" class="ml-1 text-xs text-amber-700">
       ({{ dashboardVm?.health?.sources?.join(', ') }})
     </span>

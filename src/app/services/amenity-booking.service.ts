@@ -45,6 +45,13 @@ export class AmenityBookingService {
     );
   }
 
+  createBookingAsAdminOverride(amenityId: number, booking: AmenityBooking): Observable<AmenityBooking> {
+    return this.http.post<AmenityBooking>(
+      `${this.apiUrl}/${amenityId}/bookings/admin-override`,
+      booking
+    );
+  }
+
   /**
    * Update a booking
    */
@@ -71,6 +78,13 @@ export class AmenityBookingService {
   approveBooking(amenityId: number, bookingId: number): Observable<AmenityBooking> {
     return this.http.post<AmenityBooking>(
       `${this.apiUrl}/${amenityId}/bookings/${bookingId}/approve`,
+      {}
+    );
+  }
+
+  completeBooking(amenityId: number, bookingId: number): Observable<AmenityBooking> {
+    return this.http.post<AmenityBooking>(
+      `${this.apiUrl}/${amenityId}/bookings/${bookingId}/complete`,
       {}
     );
   }

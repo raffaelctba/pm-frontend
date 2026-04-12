@@ -59,6 +59,14 @@ export const routes: Routes = [
         redirectTo: '/property/:id/units/:unitId'
       },
       {
+        path: ':id/leases',
+        redirectTo: '/property/:id/leases'
+      },
+      {
+        path: ':id/units/:unitId/leases',
+        redirectTo: '/property/:id/units/:unitId/leases'
+      },
+      {
         path: ':id/work-orders',
         redirectTo: '/property/:id/work-orders'
       },
@@ -79,6 +87,30 @@ export const routes: Routes = [
         redirectTo: '/property/:id/finances'
       },
       {
+        path: ':id/billing',
+        redirectTo: '/property/:id/billing'
+      },
+      {
+        path: ':id/billing/charges',
+        redirectTo: '/property/:id/billing/charges'
+      },
+      {
+        path: ':id/billing/statements',
+        redirectTo: '/property/:id/billing/statements'
+      },
+      {
+        path: ':id/billing/payments',
+        redirectTo: '/property/:id/billing/payments'
+      },
+      {
+        path: ':id/billing/approvals',
+        redirectTo: '/property/:id/billing/approvals'
+      },
+      {
+        path: ':id/billing/reconciliation',
+        redirectTo: '/property/:id/billing/reconciliation'
+      },
+      {
         path: ':id/edit',
         loadComponent: () => import('./pages/properties/property-form/property-form.component').then(m => m.PropertyFormComponent)
       }
@@ -95,13 +127,17 @@ export const routes: Routes = [
       {
         path: ':id',
         loadComponent: () => import('./pages/invoices/invoice-detail/invoice-detail.component').then(m => m.InvoiceDetailComponent)
+      },
+      {
+        path: ':invoiceId/pay',
+        loadComponent: () => import('./payments').then(m => m.PaymentCheckoutComponent)
       }
     ],
     canActivate: [authGuard]
   },
   {
     path: 'chat',
-    loadComponent: () => import('./pages/chat/chat.component').then(m => m.ChatComponent),
+    loadComponent: () => import('./chat').then(m => m.ChatComponent),
     canActivate: [authGuard]
   },
   {

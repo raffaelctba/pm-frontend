@@ -32,7 +32,7 @@ interface DashboardPropertyViewModel extends Property {
         <div class="card">
           <div class="flex items-center">
             <div class="flex-1">
-              <p class="text-sm text-gray-500">Total de Propriedades</p>
+              <p class="text-sm text-gray-500">{{ i18n.translate('dashboard.totalProperties') }}</p>
               <p class="text-3xl font-bold text-primary-600">{{ properties.length }}</p>
             </div>
           </div>
@@ -41,7 +41,7 @@ interface DashboardPropertyViewModel extends Property {
         <div class="card">
           <div class="flex items-center">
             <div class="flex-1">
-              <p class="text-sm text-gray-500">Faturas Pendentes</p>
+              <p class="text-sm text-gray-500">{{ i18n.translate('dashboard.pendingInvoices') }}</p>
               <p class="text-3xl font-bold text-yellow-600">0</p>
             </div>
           </div>
@@ -50,7 +50,7 @@ interface DashboardPropertyViewModel extends Property {
         <div class="card">
           <div class="flex items-center">
             <div class="flex-1">
-              <p class="text-sm text-gray-500">Mensagens Não Lidas</p>
+              <p class="text-sm text-gray-500">{{ i18n.translate('dashboard.unreadMessages') }}</p>
               <p class="text-3xl font-bold text-red-600">0</p>
             </div>
           </div>
@@ -60,32 +60,32 @@ interface DashboardPropertyViewModel extends Property {
       <!-- My Properties -->
       <div class="card">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">Minhas Propriedades</h2>
+          <h2 class="text-2xl font-bold text-gray-900">{{ i18n.translate('dashboard.myPropertiesTitle') }}</h2>
           <a routerLink="/properties/new" class="btn btn-primary">
-            Nova Propriedade
+            {{ i18n.translate('dashboard.newProperty') }}
           </a>
         </div>
 
         <div *ngIf="loading" class="text-center py-8">
-          <p class="text-gray-500">Carregando...</p>
+          <p class="text-gray-500">{{ i18n.translate('dashboard.loadingProperties') }}</p>
         </div>
 
         <div *ngIf="!loading && properties.length === 0" class="text-center py-8">
-          <p class="text-gray-500">Você ainda não possui propriedades cadastradas.</p>
+          <p class="text-gray-500">{{ i18n.translate('dashboard.noPropertiesYet') }}</p>
           <a routerLink="/properties/new" class="btn btn-primary mt-4">
-            Cadastrar Primeira Propriedade
+            {{ i18n.translate('dashboard.registerFirstProperty') }}
           </a>
         </div>
 
         <div *ngIf="!loading && properties.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div *ngFor="let property of properties" class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow">
             <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ property.name }}</h3>
-            <p class="text-sm text-gray-600 mb-2">{{ property.propertyType }}</p>
+            <p class="text-sm text-gray-600 mb-2">{{ getPropertyTypeLabel(property.propertyType) }}</p>
               <p class="text-xs text-primary-700 font-medium mb-2">
                 {{ i18n.translate('property.role.label') }}: {{ i18n.translate(getRoleLabelKey(property.currentUserRole)) }}
               </p>
               <p class="text-xs font-medium mb-2" [ngClass]="property.isBuilding ? 'text-indigo-600' : 'text-emerald-600'">
-                {{ property.isBuilding ? 'Building management workspace' : 'Private property workspace' }}
+                {{ property.isBuilding ? i18n.translate('dashboard.buildingWorkspace') : i18n.translate('dashboard.privateWorkspace') }}
               </p>
             <p class="text-sm text-gray-500 mb-4" *ngIf="property.address">
               {{ property.address.city }}, {{ property.address.state }}
@@ -100,7 +100,7 @@ interface DashboardPropertyViewModel extends Property {
                 'bg-yellow-100 text-yellow-800': property.status === 'MAINTENANCE',
                 'bg-red-100 text-red-800': property.status === 'SOLD'
               }" class="px-2 py-1 text-xs font-medium rounded-full">
-                {{ property.status }}
+                {{ getStatusLabel(property.status) }}
               </span>
             </div>
           </div>
@@ -147,5 +147,13 @@ export class DashboardComponent implements OnInit {
 
   getRoleLabelKey(role?: string): string {
     return getPropertyRoleLabelKey(role);
+  }
+
+  getPropertyTypeLabel(type?: string): string {
+    return this.i18n.translate(`property.type.${(type ?? '').toLowerCase()}`);
+  }
+
+  getStatusLabel(status?: string): string {
+    return this.i18n.translate(`property.status.${(status ?? '').toLowerCase()}`);
   }
 }

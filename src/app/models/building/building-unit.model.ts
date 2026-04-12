@@ -13,6 +13,9 @@ export interface BuildingUnit {
   parkingSpot?: string;
   storageUnit?: string;
   monthlyFeeOverride?: number | null;
+  lateFeePercentageOverride?: number | null;
+  interestRateMonthlyOverride?: number | null;
+  gracePeriodDaysOverride?: number | null;
   occupied: boolean;
   ownerId?: number;
   ownerName?: string;
@@ -35,6 +38,9 @@ export interface BuildingUnitRequest {
   parkingSpot?: string | null;
   storageUnit?: string | null;
   monthlyFeeOverride?: number | null;
+  lateFeePercentageOverride?: number | null;
+  interestRateMonthlyOverride?: number | null;
+  gracePeriodDaysOverride?: number | null;
   occupied: boolean;
   ownerId?: number | null;
   ownerName?: string | null;
@@ -89,6 +95,7 @@ export interface BuildingUnitDetails {
   ownerEmail?: string;
   tenantName?: string;
   tenantEmail?: string;
+  tenants?: UnitTenantContact[];
   totalInvoices: number;
   paidInvoices: number;
   overdueInvoices: number;
@@ -97,6 +104,12 @@ export interface BuildingUnitDetails {
   currencyCode?: string;
   paymentHistory: UnitPaymentHistoryItem[];
   recentActivity: UnitActivityItem[];
+}
+
+export interface UnitTenantContact {
+  userId?: number;
+  name?: string;
+  email?: string;
 }
 
 export type UnitActivityType = 'INVOICE_STATUS' | 'PAYMENT' | 'INCIDENT';

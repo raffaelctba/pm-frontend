@@ -118,4 +118,22 @@ export class AmenityService {
       { params }
     );
   }
+
+  getAmenitiesAnalytics(propertyId: number): Observable<{
+    propertyId: number;
+    totalReservations: number;
+    pendingReservations: number;
+    confirmedReservations: number;
+    cancelledReservations: number;
+    completedReservations: number;
+  }> {
+    return this.http.get<{
+      propertyId: number;
+      totalReservations: number;
+      pendingReservations: number;
+      confirmedReservations: number;
+      cancelledReservations: number;
+      completedReservations: number;
+    }>(`${this.apiUrl}/${propertyId}/amenities/analytics`);
+  }
 }

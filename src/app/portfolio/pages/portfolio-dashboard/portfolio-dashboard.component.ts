@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { PortfolioService } from '../../services/portfolio.service';
 import { PortfolioDashboardVm } from '../../../shared/models/portfolio-dashboard.model';
 import { NotificationCenterService } from '../../../services/notification-center.service';
+import { I18nService } from '../../../services/i18n.service';
 
 @Component({
   selector: 'app-portfolio-dashboard',
@@ -14,7 +15,8 @@ export class PortfolioDashboardComponent implements OnInit {
 
   constructor(
     private readonly portfolioService: PortfolioService,
-    private readonly notificationCenter: NotificationCenterService
+    private readonly notificationCenter: NotificationCenterService,
+    public readonly i18n: I18nService
   ) {}
 
   ngOnInit(): void {
@@ -27,8 +29,8 @@ export class PortfolioDashboardComponent implements OnInit {
           if (dashboardVm.health.degraded) {
             this.notificationCenter.upsert({
               source: 'portfolio-dashboard',
-              title: 'Portfolio dashboard partial data',
-              message: dashboardVm.health.message,
+              title: this.i18n.translate('dashboard.partialData'),
+              message: this.i18n.translate(dashboardVm.health.message),
               severity: 'warning'
             });
           } else {
@@ -41,8 +43,8 @@ export class PortfolioDashboardComponent implements OnInit {
           this.loading = false;
           this.notificationCenter.upsert({
             source: 'portfolio-dashboard',
-            title: 'Portfolio dashboard unavailable',
-            message: 'Unable to load portfolio dashboard data from the backend.',
+            title: this.i18n.translate('dashboard.unavailable'),
+            message: this.i18n.translate('dashboard.backendUnavailable'),
             severity: 'error'
           });
         });

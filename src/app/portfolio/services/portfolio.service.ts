@@ -68,8 +68,8 @@ export class PortfolioService {
           health: {
             degraded: fallbackSources.length > 0,
             message: fallbackSources.length > 0
-              ? 'Partial data loaded. Some dashboard services are temporarily unavailable.'
-              : 'All dashboard data loaded successfully.',
+              ? 'portfolio.health.partialData'
+              : 'portfolio.health.allData',
             sources: [...fallbackSources]
           }
         };

@@ -197,6 +197,26 @@ import { PropertyDTO } from '../../../models/property.model';
               <label class="label">{{ i18n.translate('building.finance.paidAmount') }} (%)</label>
               <input type="number" formControlName="interestRateMonthly" class="input" step="0.01">
             </div>
+
+            <div>
+              <label class="label">Grace period (days)</label>
+              <input type="number" formControlName="gracePeriodDays" class="input" min="0">
+            </div>
+
+            <div>
+              <label class="label">Reminder days before due</label>
+              <input type="number" formControlName="reminderDaysBeforeDue" class="input" min="0" max="30">
+            </div>
+
+            <div>
+              <label class="label">Auto-generate invoices</label>
+              <input type="checkbox" formControlName="autoGenerateInvoices" class="h-5 w-5 text-primary-600">
+            </div>
+
+            <div>
+              <label class="label">Auto-send reminders</label>
+              <input type="checkbox" formControlName="autoSendReminders" class="h-5 w-5 text-primary-600">
+            </div>
           </div>
         </div>
 
@@ -262,7 +282,11 @@ export class PropertyFormComponent implements OnInit {
       currencyCode: ['BRL'],
       dueDay: [null],
       lateFeePercentage: [null],
-      interestRateMonthly: [null]
+      interestRateMonthly: [null],
+      gracePeriodDays: [null],
+      autoGenerateInvoices: [true],
+      autoSendReminders: [true],
+      reminderDaysBeforeDue: [3]
     });
   }
 
@@ -417,7 +441,11 @@ export class PropertyFormComponent implements OnInit {
             currencyCode: billing?.currencyCode ?? property.currencyCode ?? 'BRL',
             dueDay: billing?.dueDay ?? property.dueDay ?? null,
             lateFeePercentage: billing?.lateFeePercentage ?? property.lateFeePercentage ?? null,
-            interestRateMonthly: billing?.interestRateMonthly ?? property.interestRateMonthly ?? null
+            interestRateMonthly: billing?.interestRateMonthly ?? property.interestRateMonthly ?? null,
+            gracePeriodDays: billing?.gracePeriodDays ?? null,
+            autoGenerateInvoices: billing?.autoGenerateInvoices ?? true,
+            autoSendReminders: billing?.autoSendReminders ?? true,
+            reminderDaysBeforeDue: billing?.reminderDaysBeforeDue ?? 3
           });
         },
         error: (error) => {
@@ -459,7 +487,11 @@ export class PropertyFormComponent implements OnInit {
           currencyCode: formValue.currencyCode || 'BRL',
           dueDay: this.toNumberOrUndefined(formValue.dueDay),
           lateFeePercentage: this.toNumberOrUndefined(formValue.lateFeePercentage),
-          interestRateMonthly: this.toNumberOrUndefined(formValue.interestRateMonthly)
+          interestRateMonthly: this.toNumberOrUndefined(formValue.interestRateMonthly),
+          gracePeriodDays: this.toNumberOrUndefined(formValue.gracePeriodDays),
+          autoGenerateInvoices: !!formValue.autoGenerateInvoices,
+          autoSendReminders: !!formValue.autoSendReminders,
+          reminderDaysBeforeDue: this.toNumberOrUndefined(formValue.reminderDaysBeforeDue)
         }
       : undefined;
 
@@ -494,7 +526,11 @@ export class PropertyFormComponent implements OnInit {
       formValue.currencyCode,
       formValue.dueDay,
       formValue.lateFeePercentage,
-      formValue.interestRateMonthly
+      formValue.interestRateMonthly,
+      formValue.gracePeriodDays,
+      formValue.autoGenerateInvoices,
+      formValue.autoSendReminders,
+      formValue.reminderDaysBeforeDue
     ].some((value) => value !== null && value !== undefined && `${value}`.trim() !== '');
   }
 

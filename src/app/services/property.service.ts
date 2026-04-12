@@ -83,7 +83,7 @@ export class PropertyService {
     );
   }
 
-  getPropertyLinkedUsers(id: number): Observable<PropertyLinkedUser[]> {
+  getLinkedUsers(id: number): Observable<PropertyLinkedUser[]> {
     return this.http.get<PropertyLinkedUser[]>(`${this.apiUrl}/${id}/linked-users`);
   }
 

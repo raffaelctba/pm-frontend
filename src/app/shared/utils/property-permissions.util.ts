@@ -12,8 +12,6 @@ const PRIVATE_PROPERTY_EDIT_ROLES = new Set<string>([
   'PROPERTY_LANDLORD'
 ]);
 
-const PRIVATE_PROPERTY_TENANT_ROLE = 'PROPERTY_TENANT';
-
 export function canManageBuildingOperations(role?: string): boolean {
   return !!role && BUILDING_OPERATION_ROLES.has(role);
 }
@@ -24,13 +22,5 @@ export function canEditPropertyByRole(isBuilding: boolean, role?: string): boole
   }
 
   return isBuilding ? BUILDING_OPERATION_ROLES.has(role) : PRIVATE_PROPERTY_EDIT_ROLES.has(role);
-}
-
-export function canManagePrivatePropertyOperations(role?: string): boolean {
-  return !!role && PRIVATE_PROPERTY_EDIT_ROLES.has(role);
-}
-
-export function isTenantRole(role?: string): boolean {
-  return role === PRIVATE_PROPERTY_TENANT_ROLE;
 }
 

@@ -16,6 +16,10 @@ import { BuildingDocumentService } from '../../../services/building/building-doc
 import { PropertyService } from '../../../services/property.service';
 import { I18nService } from '../../../services/i18n.service';
 import { canManageBuildingOperations } from '../../../shared/utils/property-permissions.util';
+import { DocumentsListComponent } from '../../../property/components/property-tabs/documents-tab/documents-list/documents-list.component';
+import { DocumentUploaderComponent } from '../../../property/components/property-tabs/documents-tab/document-uploader/document-uploader.component';
+import { DocumentViewerComponent } from '../../../property/components/property-tabs/documents-tab/document-viewer/document-viewer.component';
+import { DocumentTemplate, GeneratedDocument } from '../../../models';
 
 @Component({
   selector: 'app-building-documents',
@@ -32,7 +36,10 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
     MatTableModule,
     MatIconModule,
     MatSnackBarModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    DocumentsListComponent,
+    DocumentUploaderComponent,
+    DocumentViewerComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -40,10 +47,35 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
       <div class="mb-4 flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-slate-900">Documents</h1>
-          <p class="text-sm text-slate-600">Store and track building documents metadata.</p>
+          <p class="text-sm text-slate-600">Manage templates, generate documents, and preview outputs for this property.</p>
         </div>
         <a [routerLink]="['/property', buildingId()]" mat-stroked-button>Back to Property</a>
       </div>
+
+      <section class="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div class="xl:col-span-1">
+          <app-documents-list
+            [propertyId]="buildingId()"
+            (templateSelected)="onTemplateSelected($event)"
+            (documentSelected)="onDocumentSelected($event)"
+          />
+        </div>
+        <div class="xl:col-span-1">
+          <app-document-uploader
+            [propertyId]="buildingId()"
+            [selectedTemplate]="selectedTemplate()"
+            (templateSaved)="onTemplateSaved($event)"
+            (documentGenerated)="onDocumentGenerated($event)"
+          />
+        </div>
+        <div class="xl:col-span-1">
+          <app-document-viewer
+            [selectedTemplate]="selectedTemplate()"
+            [selectedGeneratedDocument]="selectedGeneratedDocument()"
+            (documentUpdated)="onDocumentUpdated($event)"
+          />
+        </div>
+      </section>
 
       <mat-card class="mb-6 p-4">
         @if (!canManageDocuments()) {
@@ -135,7 +167,7 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+               <tr mat-row *matRowDef="let row; columns: displayedColumns" [attr.data-row-id]="row.id"></tr>
             </table>
           </div>
 
@@ -167,6 +199,8 @@ export class BuildingDocumentsComponent implements OnInit {
   readonly pageSize = signal<number>(10);
   readonly totalElements = signal<number>(0);
   readonly canManageDocuments = signal<boolean>(false);
+  readonly selectedTemplate = signal<DocumentTemplate | null>(null);
+  readonly selectedGeneratedDocument = signal<GeneratedDocument | null>(null);
 
   readonly documentTypes: BuildingDocumentType[] = ['CONTRACT', 'INVOICE', 'RECEIPT', 'REPORT', 'PHOTO', 'OTHER'];
   readonly displayedColumns: string[] = ['title', 'documentType', 'fileName', 'uploadedAt', 'actions'];
@@ -204,6 +238,31 @@ export class BuildingDocumentsComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  onTemplateSelected(template: DocumentTemplate): void {
+    this.selectedTemplate.set(template);
+    this.selectedGeneratedDocument.set(null);
+  }
+
+  onDocumentSelected(document: GeneratedDocument): void {
+    this.selectedGeneratedDocument.set(document);
+    this.selectedTemplate.set(null);
+  }
+
+  onTemplateSaved(template: DocumentTemplate): void {
+    this.selectedTemplate.set(template);
+    this.snackBar.open(`Template saved: ${template.name}`, 'Close', { duration: 2500 });
+  }
+
+  onDocumentGenerated(document: GeneratedDocument): void {
+    this.selectedGeneratedDocument.set(document);
+    this.snackBar.open(`Document generated: ${document.fileName || document.id}`, 'Close', { duration: 2500 });
+  }
+
+  onDocumentUpdated(document: GeneratedDocument): void {
+    this.selectedGeneratedDocument.set(document);
+    this.snackBar.open(`Document updated: ${document.fileName || document.id}`, 'Close', { duration: 2500 });
   }
 
   createDocument(): void {

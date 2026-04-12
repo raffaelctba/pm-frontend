@@ -1,11 +1,13 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
+import { I18nService } from '../../../../services/i18n.service';
 
 @Component({
   selector: 'app-maintenance-overview-card',
   standalone: true,
-  template: '<div class="rounded-xl border border-slate-200 bg-white p-4"><p class="text-xs text-slate-500">Maintenance overview</p><p class="text-2xl font-bold text-slate-900">{{ openRequests }}</p></div>'
+  template: '<div class="rounded-xl border border-slate-200 bg-white p-4"><p class="text-xs text-slate-500">{{ i18n.translate(\'portfolio.cards.maintenanceOverview\') }}</p><p class="text-2xl font-bold text-slate-900">{{ openRequests }}</p></div>'
 })
 export class MaintenanceOverviewCardComponent {
+  readonly i18n = inject(I18nService);
   @Input() openRequests = 0;
 }
 

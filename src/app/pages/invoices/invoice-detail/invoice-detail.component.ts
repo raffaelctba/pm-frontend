@@ -37,11 +37,10 @@ import { Invoice } from '../../../models/invoice.model';
                 {{ getStatusLabel(invoice.status) }}
               </span>
             </div>
-            <button *ngIf="invoice.status === 'PENDING' || invoice.status === 'OVERDUE'"
-                    (click)="markAsPaid()"
-                    class="btn btn-primary">
-              Marcar como Pago
-            </button>
+            <div class="flex gap-2" *ngIf="invoice.status === 'PENDING' || invoice.status === 'OVERDUE'">
+              <a [routerLink]="['/invoices', invoice.id, 'pay']" class="btn btn-primary">Pagar Agora</a>
+              <button (click)="markAsPaid()" class="btn btn-secondary">Marcar como Pago</button>
+            </div>
           </div>
 
           <!-- Invoice Details -->

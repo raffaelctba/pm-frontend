@@ -47,71 +47,67 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
     <div class="mx-auto max-w-6xl px-4 py-6">
       <div class="mb-4 flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900">Work Orders</h1>
-          <p class="text-sm text-slate-600">Track maintenance workflow and update status in real time.</p>
+          <h1 class="text-2xl font-bold text-slate-900">{{ i18n.translate('building.workOrders.title') }}</h1>
+          <p class="text-sm text-slate-600">{{ i18n.translate('building.workOrders.subtitle') }}</p>
         </div>
-        <a [routerLink]="['/property', buildingId()]" mat-stroked-button>Back to Property</a>
+        <a [routerLink]="['/property', buildingId()]" mat-stroked-button>{{ i18n.translate('building.workOrders.backToProperty') }}</a>
       </div>
 
       <mat-card class="mb-6 p-4">
-        @if (canCreateWorkOrders() && !canManageWorkOrders()) {
+        @if (!canManageWorkOrders()) {
           <p class="mb-4 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            {{ i18n.translate('building.workOrders.requesterNotice') }}
+            {{ i18n.translate('building.access.readOnlyNotice') }}
           </p>
         }
-        @if (canCreateWorkOrders()) {
-        <h2 class="mb-4 text-lg font-semibold">Create Work Order</h2>
+        @if (canManageWorkOrders()) {
+        <h2 class="mb-4 text-lg font-semibold">{{ i18n.translate('building.workOrders.createTitle') }}</h2>
         <form [formGroup]="form" (ngSubmit)="createWorkOrder()" class="grid grid-cols-1 gap-4 md:grid-cols-4">
           <mat-form-field appearance="outline" class="md:col-span-2">
-            <mat-label>Title</mat-label>
+            <mat-label>{{ i18n.translate('building.workOrders.titleLabel') }}</mat-label>
             <input matInput formControlName="title" />
           </mat-form-field>
 
-          @if (canManageWorkOrders()) {
           <mat-form-field appearance="outline" class="md:col-span-2">
-            <mat-label>Assigned To</mat-label>
+            <mat-label>{{ i18n.translate('building.workOrders.assignedTo') }}</mat-label>
             <input matInput formControlName="assignedTo" />
           </mat-form-field>
-          }
 
           <mat-form-field appearance="outline" class="md:col-span-4">
-            <mat-label>Description</mat-label>
+            <mat-label>{{ i18n.translate('building.workOrders.description') }}</mat-label>
             <textarea matInput rows="3" formControlName="description"></textarea>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Priority</mat-label>
+            <mat-label>{{ i18n.translate('building.workOrders.priority') }}</mat-label>
             <mat-select formControlName="priority">
               @for (priority of priorities; track priority) {
-                <mat-option [value]="priority">{{ priority }}</mat-option>
+                <mat-option [value]="priority">{{ getPriorityLabel(priority) }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
 
-          @if (canManageWorkOrders()) {
-            <mat-form-field appearance="outline">
-              <mat-label>Status</mat-label>
-              <mat-select formControlName="status">
-                @for (status of statuses; track status) {
-                  <mat-option [value]="status">{{ status }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ i18n.translate('building.workOrders.status') }}</mat-label>
+            <mat-select formControlName="status">
+              @for (status of statuses; track status) {
+                <mat-option [value]="status">{{ getStatusLabel(status) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Estimated Cost</mat-label>
-              <input matInput type="number" formControlName="estimatedCost" />
-            </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ i18n.translate('building.workOrders.estimatedCost') }}</mat-label>
+            <input matInput type="number" formControlName="estimatedCost" />
+          </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Vendor</mat-label>
-              <input matInput formControlName="vendorName" />
-            </mat-form-field>
-          }
+          <mat-form-field appearance="outline">
+            <mat-label>{{ i18n.translate('building.workOrders.vendor') }}</mat-label>
+            <input matInput formControlName="vendorName" />
+          </mat-form-field>
 
           <div class="md:col-span-4 flex justify-end">
             <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading()">
-              Create Work Order
+              {{ i18n.translate('building.workOrders.create') }}
             </button>
           </div>
         </form>
@@ -120,18 +116,18 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
 
       <mat-card class="p-4">
         <div class="mb-3 flex items-center justify-between">
-          <h2 class="text-lg font-semibold">Work Orders ({{ totalElements() }})</h2>
+          <h2 class="text-lg font-semibold">{{ i18n.translate('building.workOrders.listTitle') }} ({{ totalElements() }})</h2>
           <div class="flex items-center gap-2">
             <mat-form-field appearance="outline" class="w-48">
-              <mat-label>Status Filter</mat-label>
+              <mat-label>{{ i18n.translate('building.workOrders.statusFilter') }}</mat-label>
               <mat-select [value]="statusFilter()" (selectionChange)="onStatusFilterChange($event.value)">
-                <mat-option value="">All</mat-option>
+                <mat-option value="">{{ i18n.translate('common.all') }}</mat-option>
                 @for (status of statuses; track status) {
-                  <mat-option [value]="status">{{ status }}</mat-option>
+                  <mat-option [value]="status">{{ getStatusLabel(status) }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
-            <button mat-stroked-button (click)="loadWorkOrders()" [disabled]="loading()">Refresh</button>
+            <button mat-stroked-button (click)="loadWorkOrders()" [disabled]="loading()">{{ i18n.translate('building.workOrders.refresh') }}</button>
           </div>
         </div>
 
@@ -140,34 +136,34 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
         }
 
         @if (loading()) {
-          <p class="text-sm text-slate-500">Loading work orders...</p>
+          <p class="text-sm text-slate-500">{{ i18n.translate('building.workOrders.loading') }}</p>
         }
 
         @if (!loading()) {
           <div class="overflow-x-auto">
             <table mat-table [dataSource]="workOrders()" class="w-full">
               <ng-container matColumnDef="title">
-                <th mat-header-cell *matHeaderCellDef>Title</th>
+                <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.workOrders.titleLabel') }}</th>
                 <td mat-cell *matCellDef="let row">{{ row.title }}</td>
               </ng-container>
 
               <ng-container matColumnDef="priority">
-                <th mat-header-cell *matHeaderCellDef>Priority</th>
-                <td mat-cell *matCellDef="let row">{{ row.priority }}</td>
+                <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.workOrders.priority') }}</th>
+                <td mat-cell *matCellDef="let row">{{ getPriorityLabel(row.priority) }}</td>
               </ng-container>
 
               <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+                <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.workOrders.status') }}</th>
+                <td mat-cell *matCellDef="let row">{{ getStatusLabel(row.status) }}</td>
               </ng-container>
 
               <ng-container matColumnDef="assignedTo">
-                <th mat-header-cell *matHeaderCellDef>Assigned</th>
+                <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.workOrders.assignedTo') }}</th>
                 <td mat-cell *matCellDef="let row">{{ row.assignedTo || '-' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.workOrders.actions') }}</th>
                 <td mat-cell *matCellDef="let row">
                   <button mat-icon-button (click)="advanceStatus(row)" [disabled]="!canManageWorkOrders() || !canAdvance(row.status)">
                     <mat-icon>sync</mat-icon>
@@ -213,7 +209,6 @@ export class BuildingWorkOrdersComponent implements OnInit, OnDestroy {
   readonly pageSize = signal<number>(10);
   readonly totalElements = signal<number>(0);
   readonly statusFilter = signal<WorkOrderStatus | ''>('');
-  readonly canCreateWorkOrders = signal<boolean>(false);
   readonly canManageWorkOrders = signal<boolean>(false);
 
   readonly priorities: WorkOrderPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
@@ -269,7 +264,7 @@ export class BuildingWorkOrdersComponent implements OnInit, OnDestroy {
   }
 
   createWorkOrder(): void {
-    if (!this.canCreateWorkOrders()) {
+    if (!this.canManageWorkOrders()) {
       this.errorMessage.set(this.i18n.translate('common.accessDenied403'));
       return;
     }
@@ -279,15 +274,7 @@ export class BuildingWorkOrdersComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const raw = this.form.getRawValue();
-    const payload: WorkOrderRequest = {
-      ...raw,
-      // Residents can open requests, but status/assignment is handled by operation roles.
-      status: this.canManageWorkOrders() ? raw.status : 'OPEN',
-      estimatedCost: this.canManageWorkOrders() ? raw.estimatedCost : null,
-      assignedTo: this.canManageWorkOrders() ? raw.assignedTo : '',
-      vendorName: this.canManageWorkOrders() ? raw.vendorName : ''
-    };
+    const payload = this.form.getRawValue() as WorkOrderRequest;
     this.loading.set(true);
 
     this.workOrderService.createWorkOrder(this.buildingId(), payload).subscribe({
@@ -342,6 +329,14 @@ export class BuildingWorkOrdersComponent implements OnInit, OnDestroy {
     return status !== 'COMPLETED' && status !== 'CANCELLED';
   }
 
+  getPriorityLabel(priority: WorkOrderPriority): string {
+    return this.i18n.translate(`workOrder.priority.${priority.toLowerCase()}`);
+  }
+
+  getStatusLabel(status: WorkOrderStatus): string {
+    return this.i18n.translate(`workOrder.status.${status.toLowerCase()}`);
+  }
+
   advanceStatus(item: WorkOrder): void {
     if (!this.canManageWorkOrders()) {
       this.errorMessage.set(this.i18n.translate('common.accessDenied403'));
@@ -355,17 +350,17 @@ export class BuildingWorkOrdersComponent implements OnInit, OnDestroy {
 
     const payload: WorkOrderStatusUpdateRequest = {
       status: nextStatus,
-      note: 'Updated from UI'
+      note: this.i18n.translate('common.edit')
     };
 
     this.loading.set(true);
     this.workOrderService.updateWorkOrderStatus(this.buildingId(), item.id, payload).subscribe({
       next: () => {
-        this.snackBar.open(`Status updated to ${nextStatus}.`, 'Close', { duration: 2500 });
+        this.snackBar.open(`${this.i18n.translate('building.workOrders.statusUpdated')}: ${this.getStatusLabel(nextStatus)}`, this.i18n.translate('common.close'), { duration: 2500 });
         this.loadWorkOrders();
       },
       error: (error) => {
-        this.errorMessage.set(error?.error?.message ?? 'Could not update status.');
+        this.errorMessage.set(error?.error?.message ?? this.i18n.translate('building.workOrders.updateError'));
         this.loading.set(false);
       }
     });
@@ -386,15 +381,8 @@ export class BuildingWorkOrdersComponent implements OnInit, OnDestroy {
 
   private loadAccessProfile(): void {
     this.propertyService.getPropertyById(this.buildingId()).subscribe({
-      next: (property) => {
-        const hasPropertyRole = !!property.currentUserRole;
-        this.canCreateWorkOrders.set(hasPropertyRole);
-        this.canManageWorkOrders.set(canManageBuildingOperations(property.currentUserRole));
-      },
-      error: () => {
-        this.canCreateWorkOrders.set(false);
-        this.canManageWorkOrders.set(false);
-      }
+      next: (property) => this.canManageWorkOrders.set(canManageBuildingOperations(property.currentUserRole)),
+      error: () => this.canManageWorkOrders.set(false)
     });
   }
 
@@ -404,7 +392,7 @@ export class BuildingWorkOrdersComponent implements OnInit, OnDestroy {
     }
 
     if (event.type === 'work-order-created' || event.type === 'work-order-status-changed') {
-      this.snackBar.open('Work order update received.', 'Close', { duration: 2500 });
+      this.snackBar.open(this.i18n.translate('building.workOrders.refresh'), this.i18n.translate('common.close'), { duration: 2500 });
       this.loadWorkOrders();
     }
   }

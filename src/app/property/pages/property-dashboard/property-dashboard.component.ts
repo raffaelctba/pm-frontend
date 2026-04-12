@@ -5,6 +5,7 @@ import { DashboardContextService } from '../../../services/dashboard-context.ser
 import { PropertyDashboardService } from '../../services/property.service';
 import { PropertyDashboardVm } from '../../../shared/models/property-dashboard.model';
 import { NotificationCenterService } from '../../../services/notification-center.service';
+import { I18nService } from '../../../services/i18n.service';
 
 @Component({
   selector: 'app-property-dashboard',
@@ -16,6 +17,7 @@ export class PropertyDashboardComponent {
   private readonly propertyDashboardService = inject(PropertyDashboardService);
   private readonly dashboardContext = inject(DashboardContextService);
   private readonly notificationCenter = inject(NotificationCenterService);
+  readonly i18n = inject(I18nService);
 
   readonly state$: Observable<{ loading: boolean; dashboardVm: PropertyDashboardVm | null }> = this.route.paramMap.pipe(
     map((params) => Number(params.get('id'))),
@@ -49,7 +51,7 @@ export class PropertyDashboardComponent {
       if (dashboardVm.health.degraded) {
         this.notificationCenter.upsert({
           source: `property-dashboard-${dashboardVm.id}`,
-          title: 'Property dashboard partial data',
+              title: this.i18n.translate('dashboard.partialData'),
           message: dashboardVm.health.message,
           severity: 'warning'
         });
@@ -63,8 +65,8 @@ export class PropertyDashboardComponent {
     queueMicrotask(() => {
       this.notificationCenter.upsert({
         source: `property-dashboard-${id}`,
-        title: 'Property dashboard unavailable',
-        message: 'Unable to load property dashboard data from the backend.',
+        title: this.i18n.translate('dashboard.unavailable'),
+        message: this.i18n.translate('dashboard.backendUnavailable'),
         severity: 'error'
       });
     });

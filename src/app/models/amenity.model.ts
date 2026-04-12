@@ -15,6 +15,13 @@ export interface Amenity {
   isActive: boolean;
   imageUrl?: string;
   rules?: string;
+  cancellationPolicy?: string;
+  maxReservationsPerTenantPerWeek?: number;
+  minReservationDurationMinutes?: number;
+  maxReservationDurationMinutes?: number;
+  blackoutDates?: string;
+  approvalThresholdAmount?: number;
+  paymentProvider?: 'MANUAL' | 'STRIPE';
 }
 
 export interface AmenityBooking {
@@ -30,12 +37,15 @@ export interface AmenityBooking {
   currencyCode: string;
   isPaid: boolean;
   paymentDate?: string;
+  paymentProvider?: 'MANUAL' | 'STRIPE';
+  paymentReference?: string;
   notes?: string;
   cancellationReason?: string;
   cancelledAt?: string;
   cancelledById?: number;
   approvedAt?: string;
   approvedById?: number;
+  adminOverride?: boolean;
 }
 
 export enum BookingStatus {
@@ -57,3 +67,19 @@ export interface TimeSlot {
   startTime: string; // ISO datetime
   endTime: string;
 }
+
+export interface AmenityMaintenanceBlock {
+  id?: number;
+  amenityId: number;
+  title: string;
+  description?: string;
+  startTime?: string;
+  endTime?: string;
+  recurring?: boolean;
+  recurrenceDayOfWeek?: number;
+  recurrenceStartDate?: string;
+  recurrenceEndDate?: string;
+  recurrenceStartTime?: string;
+  recurrenceEndTime?: string;
+}
+

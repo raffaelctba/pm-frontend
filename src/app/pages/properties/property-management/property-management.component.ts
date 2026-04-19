@@ -8,6 +8,7 @@ import { DashboardContextService } from '../../../services/dashboard-context.ser
 import { CurrencyService } from '../../../services/currency.service';
 import { I18nService } from '../../../services/i18n.service';
 import { Property } from '../../../models/property.model';
+import { isMultiUnitProperty } from '../../../shared/utils/property-permissions.util';
 
 interface LeaseDraft {
   tenantName: string;
@@ -38,11 +39,11 @@ interface LeaseDraft {
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div class="max-w-4xl">
               <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300">
-                {{ currentProperty.isBuilding ? i18n.translate('property.workspace.buildingModeTitle') : i18n.translate('property.workspace.privateModeTitle') }}
+                {{ isBuildingProperty(currentProperty) ? i18n.translate('property.workspace.buildingModeTitle') : i18n.translate('property.workspace.privateModeTitle') }}
               </p>
               <h1 class="mt-2 text-3xl font-bold md:text-4xl">{{ currentProperty.name }}</h1>
               <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-200">
-                @if (currentProperty.isBuilding) {
+                @if (isBuildingProperty(currentProperty)) {
                   {{ i18n.translate('property.workspace.buildingModeDescription') }}
                 } @else {
                   {{ i18n.translate('property.workspace.privateModeDescription') }}
@@ -63,11 +64,11 @@ interface LeaseDraft {
           <div class="mt-6 flex flex-wrap gap-2 text-xs">
             <span class="rounded-full bg-white/10 px-3 py-1 font-medium">{{ getPropertyTypeLabel(currentProperty.propertyType) }}</span>
             <span class="rounded-full bg-white/10 px-3 py-1 font-medium">{{ getStatusLabel(currentProperty.status) }}</span>
-            <span class="rounded-full bg-white/10 px-3 py-1 font-medium">{{ currentProperty.isBuilding ? i18n.translate('property.workspace.buildingOperations') : i18n.translate('property.workspace.privateManagement') }}</span>
+            <span class="rounded-full bg-white/10 px-3 py-1 font-medium">{{ isBuildingProperty(currentProperty) ? i18n.translate('property.workspace.buildingOperations') : i18n.translate('property.workspace.privateManagement') }}</span>
           </div>
         </section>
 
-        @if (currentProperty.isBuilding) {
+        @if (isBuildingProperty(currentProperty)) {
           <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ i18n.translate('property.workspace.totalUnits') }}</p>
@@ -410,8 +411,8 @@ export class PropertyManagementComponent implements OnInit {
       APARTMENT: 'property.type.apartment',
       HOUSE: 'property.type.house',
       BUILDING: 'property.type.building',
-      COMMERCIAL: 'property.type.commercial',
-      LAND: 'property.type.land'
+      COMMERCIAL_UNIT: 'property.type.commercialUnit',
+      COMMERCIAL_BUILDING: 'property.type.commercialBuilding'
     };
     return this.i18n.translate(keys[type] || type);
   }
@@ -424,6 +425,10 @@ export class PropertyManagementComponent implements OnInit {
       SOLD: 'property.status.sold'
     };
     return this.i18n.translate(keys[status] || status);
+  }
+
+  isBuildingProperty(property: Property): boolean {
+    return isMultiUnitProperty(property.propertyType);
   }
 }
 

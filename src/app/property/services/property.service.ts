@@ -16,6 +16,7 @@ import { BuildingDocumentService } from '../../services/building/building-docume
 import { BuildingIncidentService } from '../../services/building/building-incident.service';
 import { WorkOrderService } from '../../services/building/work-order.service';
 import { ComplianceItemService } from '../../services/building/compliance-item.service';
+import { isMultiUnitProperty } from '../../shared/utils/property-permissions.util';
 
 @Injectable()
 export class PropertyDashboardService {
@@ -129,15 +130,19 @@ export class PropertyDashboardService {
           header: {
             name: property.name,
             breadcrumbLabel: property.name,
-            subtitle: property.description || (property.isBuilding ? 'Building workspace' : 'Property workspace'),
+            subtitle: property.description || (isMultiUnitProperty(property.propertyType) ? 'Building workspace' : 'Property workspace'),
             typeLabel: property.propertyType,
             statusLabel: property.status,
             addressLabel: [property.address?.street, property.address?.number, property.address?.city, property.address?.state]
               .filter(Boolean)
-              .join(' · ') || 'Address not available'
+              .join(' · ') || 'Address not available',
+            userRolesLabel: property.currentUserRoles && property.currentUserRoles.length > 0
+              ? property.currentUserRoles.join(', ')
+              : property.currentUserRole || 'No role',
+            userPermissions: property.currentUserPermissions ?? []
           },
           summary: {
-            valuationLabel: property.isBuilding ? `Building • ${totalUnits} units` : property.propertyType,
+            valuationLabel: isMultiUnitProperty(property.propertyType) ? `Building • ${totalUnits} units` : property.propertyType,
             monthlyIncomeLabel: String(property.billing?.monthlyFee ?? property.monthlyFee ?? financeSummary.paidAmount ?? 0),
             occupancyRate: totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0,
             maintenanceStatusLabel: `${workOrdersOpen + incidentsOpen + compliancePending} open issues`

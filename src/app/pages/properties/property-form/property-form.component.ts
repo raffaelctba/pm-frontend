@@ -8,7 +8,7 @@ import { AddressService } from '../../../services/address.service';
 import { CurrencyService } from '../../../services/currency.service';
 import { I18nService } from '../../../services/i18n.service';
 import { AddressConfig } from '../../../models/address.model';
-import { PropertyDTO } from '../../../models/property.model';
+import { PropertyDTO, PropertyType, PropertyUsageType } from '../../../models/property.model';
 
 @Component({
   selector: 'app-property-form',
@@ -36,13 +36,25 @@ import { PropertyDTO } from '../../../models/property.model';
 
             <div>
               <label class="label">{{ i18n.translate('property.workspace.type') }} *</label>
-              <select formControlName="propertyType" class="input">
-                <option value="">{{ i18n.translate('common.optional') }}</option>
+              <select formControlName="propertyType" class="input" (change)="onPropertyTypeChange()">
+                <option value="">Select property type</option>
                 <option value="APARTMENT">{{ i18n.translate('property.type.apartment') }}</option>
                 <option value="HOUSE">{{ i18n.translate('property.type.house') }}</option>
                 <option value="BUILDING">{{ i18n.translate('property.type.building') }}</option>
-                <option value="COMMERCIAL">{{ i18n.translate('property.type.commercial') }}</option>
-                <option value="LAND">{{ i18n.translate('property.type.land') }}</option>
+                <option value="COMMERCIAL_UNIT">{{ i18n.translate('property.type.commercialUnit') }}</option>
+                <option value="COMMERCIAL_BUILDING">{{ i18n.translate('property.type.commercialBuilding') }}</option>
+              </select>
+            </div>
+
+            <div *ngIf="showUsageTypeField()">
+              <label class="label">{{ i18n.translate('property.form.usageType') }}</label>
+              <select formControlName="usageType" class="input">
+                <option value="">{{ i18n.translate('common.optional') }}</option>
+                <option value="RENTAL">{{ i18n.translate('property.form.usageType.rental') }}</option>
+                <option value="OWNER_OCCUPIED">{{ i18n.translate('property.form.usageType.ownerOccupied') }}</option>
+                <option value="VACATION_HOME">{{ i18n.translate('property.form.usageType.vacationHome') }}</option>
+                <option value="COMMERCIAL_OWNER_USE">{{ i18n.translate('property.form.usageType.commercialOwnerUse') }}</option>
+                <option value="FOR_SALE">{{ i18n.translate('property.form.usageType.forSale') }}</option>
               </select>
             </div>
 
@@ -61,10 +73,6 @@ import { PropertyDTO } from '../../../models/property.model';
               </select>
             </div>
 
-            <div>
-              <label class="label">{{ i18n.translate('property.workspace.buildingOperations') }}?</label>
-              <input type="checkbox" formControlName="isBuilding" class="h-5 w-5 text-primary-600">
-            </div>
           </div>
         </div>
 
@@ -169,7 +177,7 @@ import { PropertyDTO } from '../../../models/property.model';
         </div>
 
         <!-- Building Details -->
-        <div *ngIf="propertyForm.get('isBuilding')?.value">
+        <div *ngIf="isMultiUnitSelected()">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ i18n.translate('property.workspace.buildingManagement') }}</h2>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -261,6 +269,7 @@ export class PropertyFormComponent implements OnInit {
       name: ['', Validators.required],
       description: [''],
       propertyType: ['', Validators.required],
+      usageType: [''],
       status: ['ACTIVE'],
       address: this.fb.group({
         street: [''],
@@ -276,7 +285,6 @@ export class PropertyFormComponent implements OnInit {
       bedrooms: [null],
       bathrooms: [null],
       parkingSpaces: [null],
-      isBuilding: [false],
       totalUnits: [null],
       monthlyFee: [null],
       currencyCode: ['BRL'],
@@ -288,6 +296,25 @@ export class PropertyFormComponent implements OnInit {
       autoSendReminders: [true],
       reminderDaysBeforeDue: [3]
     });
+  }
+
+  onPropertyTypeChange(): void {
+    if (!this.isMultiUnitSelected()) {
+      this.propertyForm.patchValue({ totalUnits: null });
+    }
+
+    if (!this.showUsageTypeField()) {
+      this.propertyForm.patchValue({ usageType: null });
+    }
+  }
+
+  isMultiUnitSelected(): boolean {
+    const propertyType = this.propertyForm.get('propertyType')?.value as PropertyType | '';
+    return propertyType === PropertyType.BUILDING || propertyType === PropertyType.COMMERCIAL_BUILDING;
+  }
+
+  showUsageTypeField(): boolean {
+    return !this.isMultiUnitSelected();
   }
 
   ngOnInit(): void {
@@ -433,6 +460,8 @@ export class PropertyFormComponent implements OnInit {
           const billing = property.billing;
           this.propertyForm.patchValue({
             ...property,
+            propertyType: this.normalizeLegacyPropertyType(property.propertyType),
+            usageType: property.usageType || PropertyUsageType.RENTAL,
             address: {
               ...property.address,
               country: property.address?.countryCode || 'BR'
@@ -499,6 +528,7 @@ export class PropertyFormComponent implements OnInit {
       name: formValue.name,
       description: formValue.description,
       propertyType: formValue.propertyType,
+      usageType: this.showUsageTypeField() ? formValue.usageType || undefined : undefined,
       status: formValue.status,
       address: {
         street: formValue.address?.street,
@@ -514,7 +544,6 @@ export class PropertyFormComponent implements OnInit {
       bedrooms: this.toNumberOrUndefined(formValue.bedrooms),
       bathrooms: this.toNumberOrUndefined(formValue.bathrooms),
       parkingSpaces: this.toNumberOrUndefined(formValue.parkingSpaces),
-      isBuilding: !!formValue.isBuilding,
       totalUnits: this.toNumberOrUndefined(formValue.totalUnits),
       billing
     };
@@ -540,6 +569,16 @@ export class PropertyFormComponent implements OnInit {
     }
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  private normalizeLegacyPropertyType(value: PropertyType | string | undefined): PropertyType | string | undefined {
+    if (value === 'COMMERCIAL') {
+      return PropertyType.COMMERCIAL_UNIT;
+    }
+    if (value === 'LAND') {
+      return PropertyType.HOUSE;
+    }
+    return value;
   }
 
   private extractErrorMessage(error: unknown, fallback: string): string {

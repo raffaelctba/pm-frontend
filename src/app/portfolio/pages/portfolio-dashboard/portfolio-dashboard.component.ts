@@ -22,31 +22,27 @@ export class PortfolioDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.portfolioService.getDashboardVm().subscribe({
       next: (dashboardVm) => {
-        queueMicrotask(() => {
-          this.dashboardVm = dashboardVm;
-          this.loading = false;
+        this.dashboardVm = dashboardVm;
+        this.loading = false;
 
-          if (dashboardVm.health.degraded) {
-            this.notificationCenter.upsert({
-              source: 'portfolio-dashboard',
-              title: this.i18n.translate('dashboard.partialData'),
-              message: this.i18n.translate(dashboardVm.health.message),
-              severity: 'warning'
-            });
-          } else {
-            this.notificationCenter.clearBySource('portfolio-dashboard');
-          }
-        });
-      },
-      error: () => {
-        queueMicrotask(() => {
-          this.loading = false;
+        if (dashboardVm.health.degraded) {
           this.notificationCenter.upsert({
             source: 'portfolio-dashboard',
-            title: this.i18n.translate('dashboard.unavailable'),
-            message: this.i18n.translate('dashboard.backendUnavailable'),
-            severity: 'error'
+            title: this.i18n.translate('dashboard.partialData'),
+            message: this.i18n.translate(dashboardVm.health.message),
+            severity: 'warning'
           });
+        } else {
+          this.notificationCenter.clearBySource('portfolio-dashboard');
+        }
+      },
+      error: () => {
+        this.loading = false;
+        this.notificationCenter.upsert({
+          source: 'portfolio-dashboard',
+          title: this.i18n.translate('dashboard.unavailable'),
+          message: this.i18n.translate('dashboard.backendUnavailable'),
+          severity: 'error'
         });
       }
     });

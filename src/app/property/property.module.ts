@@ -33,6 +33,7 @@ import { DocumentViewerComponent } from './components/property-tabs/documents-ta
 import { QuickStatsComponent } from './components/property-sidebar/quick-stats/quick-stats.component';
 import { UpcomingPaymentsComponent } from './components/property-sidebar/upcoming-payments/upcoming-payments.component';
 import { AlertsComponent } from './components/property-sidebar/alerts/alerts.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [
@@ -70,7 +71,8 @@ import { AlertsComponent } from './components/property-sidebar/alerts/alerts.com
     DocumentViewerComponent,
     QuickStatsComponent,
     UpcomingPaymentsComponent,
-    AlertsComponent
+    AlertsComponent,
+    DragDropModule
   ],
   providers: [PropertyDashboardService]
 })

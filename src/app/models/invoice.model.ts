@@ -1,3 +1,5 @@
+import { InvoiceDeliveryStatus } from './invoice-lifecycle.model';
+
 export interface Invoice {
   id: number;
   propertyId: number;
@@ -12,6 +14,9 @@ export interface Invoice {
   interest: number;
   totalAmount: number;
   referenceMonth?: string;
+  deliveryStatus?: InvoiceDeliveryStatus;
+  sentDate?: string;
+  isLocked?: boolean;
 }
 
 export interface InvoiceDTO {
@@ -24,9 +29,12 @@ export interface InvoiceDTO {
 }
 
 export enum InvoiceStatus {
+  DRAFT = 'DRAFT',
+  ISSUED = 'ISSUED',
   PENDING = 'PENDING',
   PAID = 'PAID',
   OVERDUE = 'OVERDUE',
   CANCELLED = 'CANCELLED',
+  VOIDED = 'VOIDED',
   PARTIALLY_PAID = 'PARTIALLY_PAID'
 }

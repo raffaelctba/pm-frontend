@@ -55,8 +55,16 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
             {{ i18n.translate('building.access.readOnlyNotice') }}
           </p>
         }
-        <h2 class="mb-4 text-lg font-semibold">{{ editingUnitId() ? i18n.translate('building.units.editTitle') : i18n.translate('building.units.createTitle') }}</h2>
         @if (canManageUnits()) {
+        @if (!editingUnitId() && !createFormOpen()) {
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-sm text-slate-600">{{ i18n.translate('building.units.createTitle') }}</p>
+            <button mat-flat-button color="primary" type="button" (click)="openCreateForm()">
+              {{ i18n.translate('building.units.createUnit') }}
+            </button>
+          </div>
+        } @else {
+        <h2 class="mb-4 text-lg font-semibold">{{ editingUnitId() ? i18n.translate('building.units.editTitle') : i18n.translate('building.units.createTitle') }}</h2>
         <form [formGroup]="unitForm" (ngSubmit)="submitUnit()" class="grid grid-cols-1 gap-4 md:grid-cols-4">
           <mat-form-field appearance="outline">
             <mat-label>{{ i18n.translate('building.units.unitNumber') }}</mat-label>
@@ -181,16 +189,15 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
           }
 
           <div class="md:col-span-4 flex justify-end">
-            @if (editingUnitId()) {
-              <button mat-stroked-button type="button" class="mr-2" (click)="cancelEdit()" [disabled]="loading()">
-                {{ i18n.translate('building.units.cancel') }}
-              </button>
-            }
+            <button mat-stroked-button type="button" class="mr-2" (click)="cancelEdit()" [disabled]="loading()">
+              {{ i18n.translate('building.units.cancel') }}
+            </button>
             <button mat-flat-button color="primary" type="submit" [disabled]="unitForm.invalid || loading()">
               {{ editingUnitId() ? i18n.translate('building.units.saveChanges') : i18n.translate('building.units.createUnit') }}
             </button>
           </div>
         </form>
+        }
         }
       </mat-card>
 
@@ -256,7 +263,12 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
                   <button mat-icon-button color="primary" (click)="startEdit(row)" [attr.aria-label]="i18n.translate('building.units.edit')" [disabled]="!canManageUnits()">
                     <mat-icon>edit</mat-icon>
                   </button>
-                  <a mat-icon-button [routerLink]="['/property', buildingId(), 'units', row.id]" [attr.aria-label]="i18n.translate('building.units.openDashboard')">
+                  <a
+                    mat-icon-button
+                    [routerLink]="['/property', buildingId(), 'units', row.id]"
+                    [queryParams]="dashboardVisibilityQueryParams(row.id)"
+                    [attr.aria-label]="i18n.translate('building.units.openDashboard')"
+                  >
                     <mat-icon>open_in_new</mat-icon>
                   </a>
                   <a mat-icon-button [routerLink]="['/property', buildingId(), 'units', row.id, 'leases']" aria-label="Manage lease">
@@ -302,6 +314,26 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
                     <span class="rounded-full px-3 py-1 text-xs font-medium" [ngClass]="statusBadgeClass(details.status)">
                       {{ getUnitStatusLabel(details.status) }}
                     </span>
+                  </div>
+
+                  <div class="mb-4 flex flex-wrap items-center justify-between gap-2 rounded border border-slate-200 bg-white p-3">
+                    <p class="text-xs text-slate-600">{{ i18n.translate('unit.dashboard.subtenantVisibilityHint') }}</p>
+                    <mat-slide-toggle
+                      [checked]="previewElevatedVisibility()"
+                      (change)="setPreviewElevatedVisibility($event.checked)"
+                    >
+                      {{ i18n.translate('unit.dashboard.elevatedVisibility') }}
+                    </mat-slide-toggle>
+                  </div>
+
+                  <div class="mb-4 flex justify-end">
+                    <a
+                      mat-stroked-button
+                      [routerLink]="['/property', buildingId(), 'units', details.unitId]"
+                      [queryParams]="dashboardVisibilityQueryParams(details.unitId)"
+                    >
+                      {{ i18n.translate('building.units.openDashboard') }}
+                    </a>
                   </div>
 
                   <div class="mb-5 grid grid-cols-1 gap-3 md:grid-cols-4">
@@ -358,7 +390,7 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
                           <div class="rounded-lg border border-slate-200 bg-white p-3">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                               <div>
-                                <p class="text-sm font-semibold text-slate-900">{{ item.invoiceNumber }}</p>
+                                <a [routerLink]="['/invoices', item.invoiceId]" class="text-sm font-semibold text-blue-700 hover:underline">{{ item.invoiceNumber }}</a>
                                 <p class="text-xs text-slate-500">{{ i18n.translate('building.finance.dueDate') }} {{ item.dueDate }} · {{ item.payerName || item.payerEmail || i18n.translate('unit.dashboard.unknownPayer') }}</p>
                               </div>
                               <span class="rounded-full px-2 py-1 text-xs font-medium" [ngClass]="invoiceStatusClass(item.status)">
@@ -406,8 +438,10 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
   readonly ownersLoading = signal<boolean>(false);
   readonly assigneeLoadError = signal<string>('');
   readonly editingUnitId = signal<number | null>(null);
+  readonly createFormOpen = signal<boolean>(false);
   readonly selectedUnitId = signal<number | null>(null);
   readonly selectedUnitDetails = signal<BuildingUnitDetails | null>(null);
+  readonly previewElevatedVisibility = signal<boolean>(false);
   readonly detailsLoading = signal<boolean>(false);
   readonly detailsError = signal<string>('');
   readonly canManageUnits = signal<boolean>(false);
@@ -514,6 +548,7 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
     }
 
     this.editingUnitId.set(unit.id);
+    this.createFormOpen.set(true);
     this.errorMessage.set('');
     this.unitForm.patchValue({
       unitNumber: unit.unitNumber,
@@ -543,13 +578,20 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
     this.resetFormToCreateMode();
   }
 
+  openCreateForm(): void {
+    this.resetFormToCreateMode();
+    this.createFormOpen.set(true);
+  }
+
   openUnitDetails(unit: BuildingUnit): void {
     this.selectedUnitId.set(unit.id);
     this.detailsLoading.set(true);
     this.detailsError.set('');
     this.selectedUnitDetails.set(null);
 
-    this.unitService.getUnitDetails(this.buildingId(), unit.id).subscribe({
+    this.unitService.getUnitDetails(this.buildingId(), unit.id, {
+      elevatedVisibility: this.previewElevatedVisibility()
+    }).subscribe({
       next: (details) => {
         this.selectedUnitDetails.set(details);
         this.detailsLoading.set(false);
@@ -559,6 +601,32 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
         this.detailsLoading.set(false);
       }
     });
+  }
+
+  setPreviewElevatedVisibility(value: boolean): void {
+    this.previewElevatedVisibility.set(value);
+    if (!this.selectedUnitId()) {
+      return;
+    }
+
+    this.reloadSelectedUnitDetails();
+  }
+
+  dashboardVisibilityQueryParams(unitId?: number): { elevatedVisibility: 'true' } | undefined {
+    if (!unitId || this.selectedUnitId() !== unitId || !this.previewElevatedVisibility()) {
+      return undefined;
+    }
+
+    return { elevatedVisibility: 'true' };
+  }
+
+  private reloadSelectedUnitDetails(): void {
+    const currentUnitId = this.selectedUnitId();
+    if (!currentUnitId) {
+      return;
+    }
+
+    this.openUnitDetails({ id: currentUnitId } as BuildingUnit);
   }
 
   deleteUnit(unit: BuildingUnit): void {
@@ -761,6 +829,7 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
 
   private resetFormToCreateMode(): void {
     this.editingUnitId.set(null);
+    this.createFormOpen.set(false);
     this.unitForm.patchValue({
       unitNumber: '',
       unitType: 'RESIDENTIAL',

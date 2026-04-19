@@ -21,10 +21,15 @@ export interface BuildingUnit {
   ownerName?: string;
   ownerEmail?: string;
   tenantId?: number;
+  tenantIds?: number[];
   tenantName?: string;
   tenantEmail?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface UnitVisibilityOptions {
+  elevatedVisibility?: boolean;
 }
 
 export interface BuildingUnitRequest {

@@ -17,6 +17,7 @@ export interface PortfolioPropertyCardVm {
   name: string;
   propertyType: string;
   currentUserRole?: string;
+  imageUrl?: string;
 }
 
 export interface PortfolioActivityVm {

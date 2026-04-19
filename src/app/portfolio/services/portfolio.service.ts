@@ -3,6 +3,7 @@ import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 import { PropertyService } from '../../services/property.service';
 import { BuildingDashboardService, BuildingMetrics } from '../../services/building/building-dashboard.service';
 import { PortfolioActivityVm, PortfolioDashboardVm, PortfolioPropertyCardVm, PortfolioStatsVm } from '../../shared/models/portfolio-dashboard.model';
+import { isMultiUnitProperty } from '../../shared/utils/property-permissions.util';
 
 @Injectable()
 export class PortfolioService {
@@ -31,7 +32,7 @@ export class PortfolioService {
     }).pipe(
       map(({ properties, metrics, activity }) => {
         const total = properties.length;
-        const buildingCount = properties.filter((p) => p.isBuilding).length;
+        const buildingCount = properties.filter((p) => isMultiUnitProperty(p.propertyType)).length;
         const privateCount = total - buildingCount;
         const openMaintenanceRequests = metrics.incidents.pending + metrics.workOrders.pending + metrics.compliance.pending;
 

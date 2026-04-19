@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { asyncScheduler, catchError, map, Observable, observeOn, of, startWith, switchMap, tap } from 'rxjs';
+import { catchError, map, Observable, of, startWith, switchMap, tap } from 'rxjs';
 import { DashboardContextService } from '../../../services/dashboard-context.service';
 import { PropertyDashboardService } from '../../services/property.service';
 import { PropertyDashboardVm } from '../../../shared/models/property-dashboard.model';
@@ -23,7 +23,7 @@ export class PropertyDashboardComponent {
     map((params) => Number(params.get('id'))),
     switchMap((id) => {
       if (!Number.isFinite(id) || id <= 0) {
-        return of({ loading: false, dashboardVm: null }).pipe(observeOn(asyncScheduler));
+        return of({ loading: false, dashboardVm: null });
       }
 
       this.dashboardContext.setPropertyContext(id);
@@ -40,35 +40,30 @@ export class PropertyDashboardComponent {
           this.showUnavailableNotification(id);
           return of({ loading: false, dashboardVm: null });
         }),
-        startWith({ loading: true, dashboardVm: null }),
-        observeOn(asyncScheduler)
+        startWith({ loading: true, dashboardVm: null })
       );
     })
   );
 
   private syncHealthNotification(dashboardVm: PropertyDashboardVm): void {
-    queueMicrotask(() => {
-      if (dashboardVm.health.degraded) {
-        this.notificationCenter.upsert({
-          source: `property-dashboard-${dashboardVm.id}`,
-              title: this.i18n.translate('dashboard.partialData'),
-          message: dashboardVm.health.message,
-          severity: 'warning'
-        });
-      } else {
-        this.notificationCenter.clearBySource(`property-dashboard-${dashboardVm.id}`);
-      }
-    });
+    if (dashboardVm.health.degraded) {
+      this.notificationCenter.upsert({
+        source: `property-dashboard-${dashboardVm.id}`,
+        title: this.i18n.translate('dashboard.partialData'),
+        message: dashboardVm.health.message,
+        severity: 'warning'
+      });
+    } else {
+      this.notificationCenter.clearBySource(`property-dashboard-${dashboardVm.id}`);
+    }
   }
 
   private showUnavailableNotification(id: number): void {
-    queueMicrotask(() => {
-      this.notificationCenter.upsert({
-        source: `property-dashboard-${id}`,
-        title: this.i18n.translate('dashboard.unavailable'),
-        message: this.i18n.translate('dashboard.backendUnavailable'),
-        severity: 'error'
-      });
+    this.notificationCenter.upsert({
+      source: `property-dashboard-${id}`,
+      title: this.i18n.translate('dashboard.unavailable'),
+      message: this.i18n.translate('dashboard.backendUnavailable'),
+      severity: 'error'
     });
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { Property } from '../models/property.model';
+import { isMultiUnitProperty } from '../shared/utils/property-permissions.util';
 
 export type DashboardContextMode = 'global' | 'property';
 
@@ -17,7 +18,7 @@ export class DashboardContextService {
   readonly isGlobal = computed(() => this.modeState() === 'global');
   readonly isProperty = computed(() => this.modeState() === 'property');
   readonly workspaceManagementLabelKey = computed(() =>
-    this.propertyState()?.isBuilding
+    isMultiUnitProperty(this.propertyState()?.propertyType)
       ? 'property.workspace.buildingManagement'
       : 'property.workspace.privateManagement'
   );

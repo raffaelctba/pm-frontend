@@ -7,7 +7,7 @@ import { I18nService } from '../../services/i18n.service';
 import { Property } from '../../models/property.model';
 import { BuildingSummaryWidgetComponent } from './building-summary-widget.component';
 import { getPropertyRoleLabelKey } from '../../shared/utils/property-role-i18n.util';
-import { canEditPropertyByRole } from '../../shared/utils/property-permissions.util';
+import { canEditPropertyByRole, isMultiUnitProperty } from '../../shared/utils/property-permissions.util';
 
 interface DashboardPropertyViewModel extends Property {
   canManage: boolean;
@@ -84,8 +84,8 @@ interface DashboardPropertyViewModel extends Property {
               <p class="text-xs text-primary-700 font-medium mb-2">
                 {{ i18n.translate('property.role.label') }}: {{ i18n.translate(getRoleLabelKey(property.currentUserRole)) }}
               </p>
-              <p class="text-xs font-medium mb-2" [ngClass]="property.isBuilding ? 'text-indigo-600' : 'text-emerald-600'">
-                {{ property.isBuilding ? i18n.translate('dashboard.buildingWorkspace') : i18n.translate('dashboard.privateWorkspace') }}
+              <p class="text-xs font-medium mb-2" [ngClass]="isBuildingProperty(property) ? 'text-indigo-600' : 'text-emerald-600'">
+                {{ isBuildingProperty(property) ? i18n.translate('dashboard.buildingWorkspace') : i18n.translate('dashboard.privateWorkspace') }}
               </p>
             <p class="text-sm text-gray-500 mb-4" *ngIf="property.address">
               {{ property.address.city }}, {{ property.address.state }}
@@ -131,7 +131,7 @@ export class DashboardComponent implements OnInit {
         queueMicrotask(() => {
           this.properties = data.map((property) => ({
             ...property,
-            canManage: canEditPropertyByRole(Boolean(property.isBuilding), property.currentUserRole)
+            canManage: canEditPropertyByRole(property.propertyType, property.currentUserRole)
           }));
           this.loading = false;
         });
@@ -155,5 +155,9 @@ export class DashboardComponent implements OnInit {
 
   getStatusLabel(status?: string): string {
     return this.i18n.translate(`property.status.${(status ?? '').toLowerCase()}`);
+  }
+
+  isBuildingProperty(property: Property): boolean {
+    return isMultiUnitProperty(property.propertyType);
   }
 }

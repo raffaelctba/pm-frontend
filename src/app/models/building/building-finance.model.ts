@@ -1,5 +1,12 @@
 export type InvoiceStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
 
+export interface BuildingFinanceChargeItem {
+  chargeType: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+}
+
 export interface BuildingFinanceInvoice {
   id: number;
   buildingId: number;
@@ -16,6 +23,7 @@ export interface BuildingFinanceInvoice {
   referenceMonth?: string | null;
   paidDate?: string | null;
   createdAt?: string;
+  charges?: BuildingFinanceChargeItem[];
 }
 
 export interface BuildingFinanceInvoiceRequest {
@@ -25,12 +33,14 @@ export interface BuildingFinanceInvoiceRequest {
   amount: number;
   dueDate: string;
   referenceMonth?: string | null;
+  charges?: BuildingFinanceChargeItem[];
 }
 
 export interface BuildingBulkInvoiceGenerationRequest {
   referenceMonth: string;
   dueDate?: string | null;
   description?: string | null;
+  charges?: BuildingFinanceChargeItem[];
 }
 
 export interface BuildingBulkInvoiceGenerationItem {
@@ -52,6 +62,28 @@ export interface BuildingBulkInvoiceGenerationResult {
   createdInvoices: number;
   skippedUnits: number;
   items: BuildingBulkInvoiceGenerationItem[];
+}
+
+export interface BuildingBulkInvoicePreviewItem {
+  unitId: number;
+  unitNumber: string;
+  userId?: number | null;
+  baseAmount?: number | null;
+  extrasAmount?: number | null;
+  projectedTotal?: number | null;
+  status: 'READY' | 'SKIPPED';
+  reason?: string | null;
+}
+
+export interface BuildingBulkInvoicePreviewResult {
+  buildingId: number;
+  referenceMonth: string;
+  dueDate?: string | null;
+  totalUnits: number;
+  eligibleUnits: number;
+  skippedUnits: number;
+  projectedGrandTotal: number;
+  items: BuildingBulkInvoicePreviewItem[];
 }
 
 export interface BuildingFinanceSummary {

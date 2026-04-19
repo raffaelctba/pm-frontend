@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { Page } from '../../models/page.model';
 import {
   BuildingBulkInvoiceGenerationRequest,
+  BuildingBulkInvoicePreviewResult,
   BuildingBulkInvoiceGenerationResult,
   BuildingFinanceInvoice,
   BuildingFinanceInvoiceRequest,
@@ -45,6 +46,10 @@ export class BuildingFinanceService {
 
   generateInvoicesForAllUnits(buildingId: number, payload: BuildingBulkInvoiceGenerationRequest): Observable<BuildingBulkInvoiceGenerationResult> {
     return this.http.post<BuildingBulkInvoiceGenerationResult>(`${this.apiUrl}/${buildingId}/finances/invoices/generate`, payload);
+  }
+
+  previewInvoicesForAllUnits(buildingId: number, payload: BuildingBulkInvoiceGenerationRequest): Observable<BuildingBulkInvoicePreviewResult> {
+    return this.http.post<BuildingBulkInvoicePreviewResult>(`${this.apiUrl}/${buildingId}/finances/invoices/preview`, payload);
   }
 
   markAsPaid(buildingId: number, invoiceId: number): Observable<BuildingFinanceInvoice> {

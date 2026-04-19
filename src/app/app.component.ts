@@ -9,7 +9,7 @@ import { DashboardContextService } from './services/dashboard-context.service';
 import { PropertyService } from './services/property.service';
 import { SessionToastComponent } from './components/session-toast/session-toast.component';
 import { ProfileMenuComponent } from './components/profile-menu/profile-menu.component';
-import { canManageBuildingOperations } from './shared/utils/property-permissions.util';
+import { canManageBuildingOperations, isMultiUnitProperty } from './shared/utils/property-permissions.util';
 
 interface PropertySubmenuEntry {
   labelKey: string;
@@ -217,10 +217,11 @@ export class AppComponent {
   }
 
   propertySubmenuEntries(propertyId: number): PropertySubmenuEntry[] {
-    const isBuilding = this.dashboardContext.property()?.isBuilding;
+    const propertyType = this.dashboardContext.property()?.propertyType;
     const currentUserRole = this.dashboardContext.property()?.currentUserRole;
+    const multiUnit = isMultiUnitProperty(propertyType);
 
-    if (isBuilding === true) {
+    if (multiUnit) {
       if (!canManageBuildingOperations(currentUserRole)) {
         return [
           { ...this.buildingSubmenuTemplate[0], link: ['/property', propertyId] },
@@ -240,7 +241,7 @@ export class AppComponent {
       ];
     }
 
-    if (isBuilding === false) {
+    if (propertyType) {
       return [
         { ...this.privateSubmenuTemplate[0], link: ['/property', propertyId] },
         { ...this.privateSubmenuTemplate[1], link: ['/property', propertyId, 'workspace'] },

@@ -3,16 +3,16 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PropertyService } from '../../../services/property.service';
 import { I18nService } from '../../../services/i18n.service';
-import { Property } from '../../../models/property.model';
-import { canEditPropertyByRole } from '../../../shared/utils/property-permissions.util';
+import { Property, PropertyType } from '../../../models/property.model';
+import { canEditPropertyByRole, isMultiUnitProperty } from '../../../shared/utils/property-permissions.util';
 import { getPropertyRoleLabelKey } from '../../../shared/utils/property-role-i18n.util';
 
 interface PropertyCardViewModel {
   id: number;
   canAccess: boolean;
   canManage: boolean;
-  isBuilding: boolean;
   currentUserRole?: string;
+  primaryImageUrl?: string;
   name: string;
   description: string;
   propertyType: string;
@@ -67,6 +67,17 @@ interface PropertyCardViewModel {
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           @for (property of properties(); track property.id) {
             <article class="card flex h-full flex-col border border-gray-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl">
+              <div class="mb-4 overflow-hidden rounded-xl border border-slate-100 bg-slate-100">
+                <img
+                  class="h-48 w-full object-cover"
+                  [src]="getPropertyImageSrc(property, $index)"
+                  [alt]="property.name"
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
+                  (error)="setFallbackImage($event, property, $index)"
+                />
+              </div>
+
           <div class="mb-4 flex items-start justify-between gap-3">
             <div>
               <h2 class="text-xl font-semibold text-gray-900">{{ property.name }}</h2>
@@ -75,8 +86,8 @@ interface PropertyCardViewModel {
                 {{ i18n.translate('property.role.label') }}: {{ i18n.translate(getRoleLabelKey(property.currentUserRole)) }}
               </p>
             </div>
-            <span class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="property.isBuilding ? 'bg-indigo-100 text-indigo-800' : 'bg-emerald-100 text-emerald-800'">
-              {{ property.isBuilding ? i18n.translate('dashboard.buildingWorkspace') : i18n.translate('dashboard.privateWorkspace') }}
+            <span class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="isBuildingProperty(property) ? 'bg-indigo-100 text-indigo-800' : 'bg-emerald-100 text-emerald-800'">
+              {{ isBuildingProperty(property) ? i18n.translate('dashboard.buildingWorkspace') : i18n.translate('dashboard.privateWorkspace') }}
             </span>
             <span [ngClass]="{
               'bg-green-100 text-green-800': property.status === 'ACTIVE',
@@ -161,8 +172,7 @@ export class PropertyListComponent implements OnInit {
     const parsedId = Number((property as { id?: unknown }).id);
     const id = Number.isFinite(parsedId) ? parsedId : -(index + 1);
     const canAccess = id > 0;
-    const isBuilding = Boolean(property.isBuilding);
-    const canManage = canAccess && canEditPropertyByRole(isBuilding, property.currentUserRole);
+    const canManage = canAccess && canEditPropertyByRole(property.propertyType, property.currentUserRole);
 
     const address = property.address;
     const addressLine = address
@@ -176,8 +186,8 @@ export class PropertyListComponent implements OnInit {
       id,
       canAccess,
       canManage,
-      isBuilding,
       currentUserRole: property.currentUserRole,
+      primaryImageUrl: property.primaryImageUrl,
       name: property.name || this.i18n.translate('property.list.noName'),
       description: property.description || this.i18n.translate('property.list.noDescription'),
       propertyType: property.propertyType,
@@ -218,5 +228,30 @@ export class PropertyListComponent implements OnInit {
 
   getRoleLabelKey(role?: string): string {
     return getPropertyRoleLabelKey(role);
+  }
+
+  isBuildingProperty(property: Pick<PropertyCardViewModel, 'propertyType'>): boolean {
+    return isMultiUnitProperty(property.propertyType as PropertyType);
+  }
+
+  getPropertyImageSrc(property: PropertyCardViewModel, index: number): string {
+    return property.primaryImageUrl || this.getDemoImageSrc(property.id, index);
+  }
+
+  setFallbackImage(event: Event, property: PropertyCardViewModel, index: number): void {
+    const target = event.target as HTMLImageElement | null;
+    if (target) {
+      target.src = this.getDemoImageSrc(property.id, index);
+    }
+  }
+
+  private getDemoImageSrc(propertyId: number, index: number): string {
+    const demoImages = [
+      '/assets/demo-property-images/property-1.svg',
+      '/assets/demo-property-images/property-2.svg',
+      '/assets/demo-property-images/property-3.svg'
+    ];
+
+    return demoImages[Math.abs(propertyId || index) % demoImages.length];
   }
 }

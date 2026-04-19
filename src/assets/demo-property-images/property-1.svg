@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-labelledby="title desc">
+  <title id="title">Demo property image 1</title>
+  <desc id="desc">Stylized modern house illustration for property listings</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dbeafe"/>
+      <stop offset="100%" stop-color="#bfdbfe"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" rx="36" fill="url(#bg)"/>
+  <circle cx="650" cy="90" r="54" fill="#fde68a" opacity="0.95"/>
+  <path d="M130 330 L360 150 L590 330 Z" fill="#1d4ed8" opacity="0.92"/>
+  <rect x="190" y="300" width="340" height="160" rx="18" fill="#ffffff"/>
+  <rect x="240" y="345" width="80" height="115" rx="10" fill="#60a5fa"/>
+  <rect x="360" y="345" width="110" height="70" rx="10" fill="#93c5fd"/>
+  <rect x="510" y="260" width="70" height="200" rx="10" fill="#0f172a" opacity="0.15"/>
+  <path d="M90 470 H710" stroke="#1e3a8a" stroke-width="14" stroke-linecap="round" opacity="0.25"/>
+  <text x="40" y="70" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700" fill="#1e3a8a">Property Demo 01</text>
+</svg>
+

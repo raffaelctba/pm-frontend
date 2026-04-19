@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, NgZone, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -127,7 +127,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     private chatService: ChatService,
     private authService: AuthService,
     private i18n: I18nService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -160,14 +161,18 @@ export class ChatComponent implements OnInit, OnDestroy {
   loadConversations(): void {
     this.chatService.getMyConversations().subscribe({
       next: (data) => {
-        this.conversations = data;
-        this.groupConversations();
-        this.tryResolvePreferredConversation();
-        this.loadingRooms = false;
+        this.ngZone.run(() => {
+          this.conversations = data;
+          this.groupConversations();
+          this.tryResolvePreferredConversation();
+          this.loadingRooms = false;
+        });
       },
       error: (error) => {
         console.error('Error loading conversations:', error);
-        this.loadingRooms = false;
+        this.ngZone.run(() => {
+          this.loadingRooms = false;
+        });
       }
     });
   }
@@ -188,12 +193,16 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.loadingMessages = true;
     this.chatService.getConversationMessages(this.selectedConversation.id, 0, 50).subscribe({
       next: (data) => {
-        this.messages = data.content.reverse();
-        this.loadingMessages = false;
+        this.ngZone.run(() => {
+          this.messages = data.content.reverse();
+          this.loadingMessages = false;
+        });
       },
       error: (error) => {
         console.error('Error loading messages:', error);
-        this.loadingMessages = false;
+        this.ngZone.run(() => {
+          this.loadingMessages = false;
+        });
       }
     });
   }
@@ -203,7 +212,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.chatService.disconnectWebSocket();
     await this.chatService.connectWebSocket(this.selectedConversation.id, (message) => {
-      this.messages.push(message);
+      this.ngZone.run(() => {
+        this.appendMessage(message);
+      });
     });
   }
 
@@ -218,14 +229,18 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.chatService.sendMessage(messageDTO).subscribe({
       next: (created) => {
-        this.messages.push(created);
-        this.newMessage = '';
-        this.sending = false;
+        this.ngZone.run(() => {
+          this.appendMessage(created);
+          this.newMessage = '';
+          this.sending = false;
+        });
       },
       error: (error) => {
         console.error('Error sending message:', error);
         alert('Erro ao enviar mensagem');
-        this.sending = false;
+        this.ngZone.run(() => {
+          this.sending = false;
+        });
       }
     });
   }
@@ -304,6 +319,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
 
     this.groupConversations();
+  }
+
+  private appendMessage(message: ChatMessage): void {
+    if (this.messages.some((current) => current.id === message.id)) {
+      return;
+    }
+    this.messages = [...this.messages, message];
   }
 }
 

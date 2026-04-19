@@ -17,15 +17,19 @@ export interface Property {
   name: string;
   description?: string;
   propertyType: PropertyType;
+  usageType?: PropertyUsageType;
   status: PropertyStatus;
   address?: Address;
   areaSize?: number;
   bedrooms?: number;
   bathrooms?: number;
   parkingSpaces?: number;
-  isBuilding: boolean;
   totalUnits?: number;
   currentUserRole?: string;
+  currentUserRoles?: string[];
+  currentUserPermissions?: string[];
+  primaryImageUrl?: string;
+  primaryImageId?: number;
   monthlyFee?: number;
   currencyCode?: string;
   dueDay?: number;
@@ -38,14 +42,15 @@ export interface PropertyDTO {
   name: string;
   description?: string;
   propertyType: PropertyType;
+  usageType?: PropertyUsageType;
   status: PropertyStatus;
   address?: Address;
   areaSize?: number;
   bedrooms?: number;
   bathrooms?: number;
   parkingSpaces?: number;
-  isBuilding: boolean;
   totalUnits?: number;
+  primaryImageUrl?: string;
   monthlyFee?: number;
   currencyCode?: string;
   dueDay?: number;
@@ -81,9 +86,18 @@ export enum PropertyType {
   APARTMENT = 'APARTMENT',
   HOUSE = 'HOUSE',
   BUILDING = 'BUILDING',
-  COMMERCIAL = 'COMMERCIAL',
-  LAND = 'LAND'
+  COMMERCIAL_UNIT = 'COMMERCIAL_UNIT',
+  COMMERCIAL_BUILDING = 'COMMERCIAL_BUILDING'
 }
+
+export enum PropertyUsageType {
+  RENTAL = 'RENTAL',
+  OWNER_OCCUPIED = 'OWNER_OCCUPIED',
+  VACATION_HOME = 'VACATION_HOME',
+  COMMERCIAL_OWNER_USE = 'COMMERCIAL_OWNER_USE',
+  FOR_SALE = 'FOR_SALE'
+}
+
 
 export enum PropertyStatus {
   ACTIVE = 'ACTIVE',

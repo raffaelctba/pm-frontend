@@ -3,7 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Page } from '../../models/page.model';
-import { BuildingUnit, BuildingUnitDetails, BuildingUnitRequest, UnitAssigneeOptions } from '../../models/building/building-unit.model';
+import {
+  BuildingUnit,
+  BuildingUnitDetails,
+  BuildingUnitRequest,
+  UnitAssigneeOptions,
+  UnitVisibilityOptions
+} from '../../models/building/building-unit.model';
 
 @Injectable({
   providedIn: 'root'
@@ -25,8 +31,16 @@ export class BuildingUnitService {
     return this.http.get<UnitAssigneeOptions>(`${this.apiUrl}/${buildingId}/units/assignees`);
   }
 
-  getUnitDetails(buildingId: number, unitId: number): Observable<BuildingUnitDetails> {
-    return this.http.get<BuildingUnitDetails>(`${this.apiUrl}/${buildingId}/units/${unitId}/details`);
+  getUnit(buildingId: number, unitId: number, options?: UnitVisibilityOptions): Observable<BuildingUnit> {
+    return this.http.get<BuildingUnit>(`${this.apiUrl}/${buildingId}/units/${unitId}`, {
+      params: this.buildVisibilityParams(options)
+    });
+  }
+
+  getUnitDetails(buildingId: number, unitId: number, options?: UnitVisibilityOptions): Observable<BuildingUnitDetails> {
+    return this.http.get<BuildingUnitDetails>(`${this.apiUrl}/${buildingId}/units/${unitId}/details`, {
+      params: this.buildVisibilityParams(options)
+    });
   }
 
   createUnit(buildingId: number, payload: BuildingUnitRequest): Observable<BuildingUnit> {
@@ -39,6 +53,14 @@ export class BuildingUnitService {
 
   deleteUnit(buildingId: number, unitId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${buildingId}/units/${unitId}`);
+  }
+
+  private buildVisibilityParams(options?: UnitVisibilityOptions): HttpParams | undefined {
+    if (!options || options.elevatedVisibility === undefined) {
+      return undefined;
+    }
+
+    return new HttpParams().set('elevatedVisibility', String(options.elevatedVisibility));
   }
 }
 

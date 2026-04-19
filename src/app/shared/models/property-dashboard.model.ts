@@ -5,6 +5,8 @@ export interface PropertyHeaderVm {
   typeLabel: string;
   statusLabel: string;
   addressLabel: string;
+  userRolesLabel?: string;
+  userPermissions?: string[];
 }
 
 export interface PropertySummaryCardsVm {

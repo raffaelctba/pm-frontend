@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { InvoiceService } from '../../../services/invoice.service';
-import { Invoice } from '../../../models/invoice.model';
+import { Invoice, InvoiceStatus } from '../../../models/invoice.model';
 import { Page } from '../../../models/page.model';
 
 @Component({
@@ -68,10 +68,20 @@ import { Page } from '../../../models/page.model';
               <a [routerLink]="['/invoices', invoice.id]" class="btn btn-secondary text-sm">
                 Ver Detalhes
               </a>
+              <button *ngIf="invoice.status === 'DRAFT'"
+                      [routerLink]="['/invoices', invoice.id, 'edit']"
+                      class="btn btn-info text-sm">
+                Editar
+              </button>
               <button *ngIf="invoice.status === 'PENDING' || invoice.status === 'OVERDUE'"
                       (click)="markAsPaid(invoice.id)"
                       class="btn btn-primary text-sm">
                 Marcar como Pago
+              </button>
+              <button *ngIf="isFinalized(invoice.status)"
+                      (click)="showActions(invoice.id)"
+                      class="btn btn-secondary text-sm">
+                Ações
               </button>
             </div>
           </div>
@@ -102,7 +112,10 @@ export class InvoiceListComponent implements OnInit {
   pageSize = 10;
   totalPages = 0;
 
-  constructor(private invoiceService: InvoiceService) {}
+  constructor(
+    private invoiceService: InvoiceService,
+    private ngZone: NgZone
+  ) {}
 
   ngOnInit(): void {
     this.loadPage(0);
@@ -112,14 +125,18 @@ export class InvoiceListComponent implements OnInit {
     this.loading = true;
     this.invoiceService.getAllInvoices(page, this.pageSize).subscribe({
       next: (data: Page<Invoice>) => {
-        this.invoices = data.content;
-        this.currentPage = data.pageable.pageNumber;
-        this.totalPages = data.totalPages;
-        this.loading = false;
+        this.ngZone.run(() => {
+          this.invoices = data.content;
+          this.currentPage = data.pageable.pageNumber;
+          this.totalPages = data.totalPages;
+          this.loading = false;
+        });
       },
       error: (error) => {
         console.error('Error loading invoices:', error);
-        this.loading = false;
+        this.ngZone.run(() => {
+          this.loading = false;
+        });
       }
     });
   }
@@ -151,5 +168,14 @@ export class InvoiceListComponent implements OnInit {
 
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('pt-BR');
+  }
+
+  isFinalized(status: string): boolean {
+    return status !== 'DRAFT' && status !== 'PENDING' && status !== 'OVERDUE';
+  }
+
+  showActions(invoiceId: number): void {
+    alert('Ações adicionais para a fatura ' + invoiceId);
+    // This will be expanded with a proper action menu/modal
   }
 }

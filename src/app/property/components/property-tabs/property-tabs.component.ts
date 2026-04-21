@@ -4,7 +4,7 @@ import { I18nService } from '../../../services/i18n.service';
 import { DashboardContextService } from '../../../services/dashboard-context.service';
 import { PropertyImageService } from '../../../services/property-image.service';
 import { PropertyImage } from '../../../models/property-image.model';
-import { isMultiUnitProperty } from '../../../shared/utils/property-permissions.util';
+import { canManageBuildingOperations } from '../../../shared/utils/property-permissions.util';
 import { getPropertyRoleLabelKey } from '../../../shared/utils/property-role-i18n.util';
 
 @Component({
@@ -12,15 +12,29 @@ import { getPropertyRoleLabelKey } from '../../../shared/utils/property-role-i18
   standalone: false,
   template: `
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div class="mb-4 flex flex-wrap gap-2">
-        <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">{{ i18n.translate('property.tabs.nav.overview') }}</span>
-        <a *ngIf="showUnitsTab()" [routerLink]="['/property', propertyId, 'units']" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors">{{ i18n.translate('property.tabs.nav.units') }}</a>
-        <a [routerLink]="['/property', propertyId, 'leases']" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors">{{ i18n.translate('property.tabs.nav.leases') }}</a>
-        <a [routerLink]="['/property', propertyId, 'finances']" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors">{{ i18n.translate('property.tabs.nav.financials') }}</a>
-        <a [routerLink]="['/property', propertyId, 'billing']" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors">{{ i18n.translate('property.tabs.nav.billing') }}</a>
-        <a [routerLink]="['/property', propertyId, 'work-orders']" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors">{{ i18n.translate('property.tabs.nav.maintenance') }}</a>
-        <a [routerLink]="['/property', propertyId, 'documents']" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors">{{ i18n.translate('property.tabs.nav.documents') }}</a>
+      <div class="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+        {{ i18n.translate('property.tabs.nav.overview') }} · Use o menu superior da propriedade para navegar entre modulos.
       </div>
+
+      @if (propertyId && canManageOverviewActions()) {
+        <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 class="text-sm font-semibold text-slate-900">{{ i18n.translate('property.tabs.quickActions') }}</h3>
+              <p class="mt-1 text-xs text-slate-600">{{ i18n.translate('property.tabs.quickActions.description') }}</p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <a [routerLink]="['/properties', propertyId, 'edit']" class="btn btn-primary text-xs">
+                {{ i18n.translate('property.workspace.editProperty') }}
+              </a>
+              <a [routerLink]="['/property', propertyId, 'units']" class="btn btn-secondary text-xs">
+                {{ i18n.translate('property.tabs.quickActions.manageUnits') }}
+              </a>
+            </div>
+          </div>
+        </div>
+      }
 
       <div *ngIf="dashboard as vm" class="space-y-4">
         <!-- Current User Roles Section -->
@@ -298,6 +312,22 @@ export class PropertyTabsComponent implements OnChanges {
     return role === 'PROPERTY_ADMIN' || role === 'PROPERTY_OWNER';
   }
 
+  canManageOverviewActions(): boolean {
+    if (this.getUserRoles().some((role: string) => canManageBuildingOperations(role))) {
+      return true;
+    }
+
+    const normalizedPermissions = this.getUserPermissionKeys().map((permission: string) => permission.toUpperCase());
+    return normalizedPermissions.some((permission: string) =>
+      permission.includes('PROPERTY_EDIT')
+      || permission.includes('PROPERTY_MANAGE')
+      || permission.includes('BUILDING_MANAGE')
+      || permission.includes('BUILDING_WRITE')
+      || permission.includes('UNIT_MANAGE')
+      || permission.includes('UNIT_WRITE')
+    );
+  }
+
   imageUrl(image: PropertyImage): string {
     return this.propertyImageService.getImageUrl(image.imageUrl);
   }
@@ -318,17 +348,13 @@ export class PropertyTabsComponent implements OnChanges {
     return value?.toLowerCase().trim().replace(/[_\s]+/g, '-') || '';
   }
 
-  showUnitsTab(): boolean {
-    return isMultiUnitProperty(this.dashboardContext.property()?.propertyType);
-  }
-
   getUserRoles(): string[] {
     if (!this.dashboard?.header?.userRolesLabel) {
       return [];
     }
     return this.dashboard.header.userRolesLabel
       .split(', ')
-      .filter(role => role && role !== 'No role');
+      .filter((role: string) => role && role !== 'No role');
   }
 
   getPropertyRoleLabelKey(role: string): string {
@@ -337,7 +363,7 @@ export class PropertyTabsComponent implements OnChanges {
 
   getUserPermissionKeys(): string[] {
     const permissions = this.dashboard?.header?.userPermissions ?? [];
-    return Array.from(new Set(permissions.filter((permission) => !!permission)));
+    return Array.from(new Set(permissions.filter((permission: string) => !!permission)));
   }
 }
 

@@ -7,6 +7,7 @@ import { I18nService } from './services/i18n.service';
 import { NotificationCenterService } from './services/notification-center.service';
 import { DashboardContextService } from './services/dashboard-context.service';
 import { PropertyService } from './services/property.service';
+import { UserPreferencesService } from './services/user-preferences.service';
 import { SessionToastComponent } from './components/session-toast/session-toast.component';
 import { ProfileMenuComponent } from './components/profile-menu/profile-menu.component';
 import { canManageBuildingOperations, isMultiUnitProperty } from './shared/utils/property-permissions.util';
@@ -23,8 +24,8 @@ interface PropertySubmenuEntry {
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, SessionToastComponent, ProfileMenuComponent],
   template: `
-    <div class="min-h-screen bg-gray-50">
-      <nav class="bg-white shadow-lg">
+    <div class="min-h-screen bg-gray-50 transition-colors dark:bg-slate-950">
+      <nav class="bg-white shadow-lg transition-colors dark:bg-slate-900 dark:shadow-black/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between h-16">
             <div class="flex">
@@ -32,26 +33,26 @@ interface PropertySubmenuEntry {
                 <a routerLink="/" class="text-2xl font-bold text-primary-600">MyProperty</a>
               </div>
               <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <a *ngIf="!authService.isLoggedIn()" routerLink="/" routerLinkActive="border-primary-500 text-gray-900"
+                <a *ngIf="!authService.isLoggedIn()" routerLink="/" routerLinkActive="border-primary-500 text-gray-900 dark:text-slate-100"
                    [routerLinkActiveOptions]="{ exact: true }"
-                   class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                   class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200">
                   {{ i18n.translate('nav.home') }}
                 </a>
                 <ng-container *ngIf="authService.isLoggedIn()">
-                <a routerLink="/portfolio" routerLinkActive="border-primary-500 text-gray-900"
-                   class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                <a routerLink="/portfolio" routerLinkActive="border-primary-500 text-gray-900 dark:text-slate-100"
+                   class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200">
                   {{ i18n.translate('nav.dashboard') }}
                 </a>
-                <a routerLink="/properties" routerLinkActive="border-primary-500 text-gray-900"
-                   class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                <a routerLink="/properties" routerLinkActive="border-primary-500 text-gray-900 dark:text-slate-100"
+                   class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200">
                   {{ i18n.translate('nav.properties') }}
                 </a>
-                <a routerLink="/invoices" routerLinkActive="border-primary-500 text-gray-900"
-                   class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                <a routerLink="/invoices" routerLinkActive="border-primary-500 text-gray-900 dark:text-slate-100"
+                   class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200">
                   {{ i18n.translate('nav.invoices') }}
                 </a>
-                <a routerLink="/chat" routerLinkActive="border-primary-500 text-gray-900"
-                   class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                <a routerLink="/chat" routerLinkActive="border-primary-500 text-gray-900 dark:text-slate-100"
+                   class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200">
                   {{ i18n.translate('nav.chat') }}
                 </a>
                 </ng-container>
@@ -61,7 +62,7 @@ interface PropertySubmenuEntry {
               <div class="relative">
                 <button
                   type="button"
-                  class="relative rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50"
+                  class="relative rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                   [attr.aria-label]="i18n.translate('notification.title')"
                   (click)="toggleNotifications($event)"
                 >
@@ -74,31 +75,31 @@ interface PropertySubmenuEntry {
                   </span>
                 </button>
 
-                <div *ngIf="notificationPanelOpen()" class="absolute right-0 top-12 z-50 w-96 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl">
-                  <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <h3 class="text-sm font-semibold text-slate-900">{{ i18n.translate('notification.title') }}</h3>
-                    <button type="button" class="text-xs text-primary-700 hover:text-primary-800" (click)="clearNotifications()">
+                <div *ngIf="notificationPanelOpen()" class="absolute right-0 top-12 z-50 w-96 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/50">
+                  <div class="flex items-center justify-between border-b border-slate-200 pb-2 dark:border-slate-700">
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ i18n.translate('notification.title') }}</h3>
+                    <button type="button" class="text-xs text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200" (click)="clearNotifications()">
                       {{ i18n.translate('notification.clearAll') }}
                     </button>
                   </div>
 
                   <div class="mt-3 max-h-80 space-y-3 overflow-auto">
-                    <div *ngIf="notificationCenter.items().length === 0" class="rounded-lg border border-dashed border-slate-200 p-3 text-sm text-slate-500">
+                    <div *ngIf="notificationCenter.items().length === 0" class="rounded-lg border border-dashed border-slate-200 p-3 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
                       {{ i18n.translate('notification.empty') }}
                     </div>
 
                     <div *ngFor="let notification of notificationCenter.items(); trackBy: trackByNotificationId" class="rounded-lg border px-3 py-2" [ngClass]="notificationBorderClass(notification.severity)">
                       <div class="flex items-start justify-between gap-3">
                         <div>
-                          <p class="text-sm font-medium text-slate-900">{{ notification.title }}</p>
-                          <p class="text-xs text-slate-600">{{ notification.message }}</p>
-                          <p class="mt-1 text-[10px] uppercase tracking-wide text-slate-400">{{ notification.source }}</p>
+                          <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ notification.title }}</p>
+                          <p class="text-xs text-slate-600 dark:text-slate-300">{{ notification.message }}</p>
+                          <p class="mt-1 text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ notification.source }}</p>
                         </div>
                         <div class="flex items-center gap-2">
-                          <button type="button" class="text-xs text-slate-500 hover:text-slate-700" (click)="markAsRead(notification.id)">
+                          <button type="button" class="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200" (click)="markAsRead(notification.id)">
                             {{ notification.read ? '✓' : i18n.translate('notification.markRead') }}
                           </button>
-                          <button type="button" class="text-slate-400 hover:text-slate-600" (click)="dismissNotification(notification.id)">×</button>
+                          <button type="button" class="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300" (click)="dismissNotification(notification.id)">×</button>
                         </div>
                       </div>
                     </div>
@@ -115,30 +116,36 @@ interface PropertySubmenuEntry {
             </ng-template>
           </div>
 
-          <div *ngIf="authService.isLoggedIn() && currentPropertyId() as propertyId" class="border-t border-slate-100 py-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="mr-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {{ i18n.translate(dashboardContext.workspaceManagementLabelKey()) }}
-              </span>
-
-              <a
-                *ngFor="let entry of propertySubmenuEntries(propertyId); trackBy: trackBySubmenuLabel"
-                [routerLink]="entry.link"
-                [queryParams]="entry.queryParams ?? null"
-                routerLinkActive="bg-primary-100 text-primary-700"
-                [routerLinkActiveOptions]="{ exact: entry.exact ?? false }"
-                class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
-              >
-                {{ i18n.translate(entry.labelKey) }}
-              </a>
-            </div>
-          </div>
         </div>
       </nav>
 
+      <div
+        *ngIf="authService.isLoggedIn() && currentPropertyId() as propertyId"
+        class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 py-2 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/95"
+      >
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="mr-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              {{ i18n.translate(dashboardContext.workspaceManagementLabelKey()) }}
+            </span>
+
+            <a
+              *ngFor="let entry of propertySubmenuEntries(propertyId); trackBy: trackBySubmenuLabel"
+              [routerLink]="entry.link"
+              [queryParams]="entry.queryParams ?? null"
+              routerLinkActive="bg-primary-100 text-primary-700 dark:bg-primary-500/20 dark:text-primary-300"
+              [routerLinkActiveOptions]="{ exact: entry.exact ?? false }"
+              class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              {{ i18n.translate(entry.labelKey) }}
+            </a>
+          </div>
+        </div>
+      </div>
+
       <app-session-toast />
 
-      <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
         <router-outlet></router-outlet>
       </main>
     </div>
@@ -171,9 +178,12 @@ export class AppComponent {
     public notificationCenter: NotificationCenterService,
     public i18n: I18nService,
     public dashboardContext: DashboardContextService,
-    private readonly propertyService: PropertyService
+    private readonly propertyService: PropertyService,
+    private readonly userPreferences: UserPreferencesService
   ) {
     this.i18n.init();
+    // Force early preferences service initialization so dark mode class is applied globally.
+    this.userPreferences.themeMode();
     this.syncPropertyRouteContext();
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
@@ -295,13 +305,13 @@ export class AppComponent {
   notificationBorderClass(severity: string): string {
     switch (severity) {
       case 'error':
-        return 'border-red-200 bg-red-50';
+        return 'border-red-200 bg-red-50 dark:border-red-900/80 dark:bg-red-950/40';
       case 'warning':
-        return 'border-amber-200 bg-amber-50';
+        return 'border-amber-200 bg-amber-50 dark:border-amber-900/80 dark:bg-amber-950/40';
       case 'success':
-        return 'border-emerald-200 bg-emerald-50';
+        return 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/80 dark:bg-emerald-950/40';
       default:
-        return 'border-slate-200 bg-slate-50';
+        return 'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/60';
     }
   }
 }

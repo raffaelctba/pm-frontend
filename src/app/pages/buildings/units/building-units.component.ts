@@ -19,6 +19,7 @@ import { BuildingAlertEvent, BuildingRealtimeService } from '../../../services/b
 import { PropertyService } from '../../../services/property.service';
 import { I18nService } from '../../../services/i18n.service';
 import { canManageBuildingOperations } from '../../../shared/utils/property-permissions.util';
+import { Property } from '../../../models/property.model';
 
 @Component({
   selector: 'app-building-units',
@@ -131,7 +132,7 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
           @if (owners().length > 0) {
             <mat-form-field appearance="outline" class="md:col-span-2">
               <mat-label>{{ i18n.translate('building.units.ownerExisting') }}</mat-label>
-              <mat-select formControlName="ownerId">
+              <mat-select formControlName="ownerId" (valueChange)="onOwnerSelected($event)">
                 <mat-option [value]="null">{{ i18n.translate('common.none') }}</mat-option>
                 @for (owner of owners(); track owner.id) {
                   <mat-option [value]="owner.id">{{ ownerDisplayName(owner) }}</mat-option>
@@ -157,7 +158,7 @@ import { canManageBuildingOperations } from '../../../shared/utils/property-perm
           @if (tenants().length > 0) {
             <mat-form-field appearance="outline" class="md:col-span-2">
               <mat-label>{{ i18n.translate('building.units.tenantExisting') }}</mat-label>
-              <mat-select formControlName="tenantId">
+              <mat-select formControlName="tenantId" (valueChange)="onTenantSelected($event)">
                 <mat-option [value]="null">{{ i18n.translate('common.none') }}</mat-option>
                 @for (tenant of tenants(); track tenant.id) {
                   <mat-option [value]="tenant.id">{{ ownerDisplayName(tenant) }}</mat-option>
@@ -673,7 +674,7 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
   private loadAccessProfile(): void {
     this.propertyService.getPropertyById(this.buildingId()).subscribe({
       next: (property) => {
-        this.canManageUnits.set(canManageBuildingOperations(property.currentUserRole));
+        this.canManageUnits.set(this.canManageUnitAssignments(property));
         this.loadAssignableUsers();
       },
       error: () => {
@@ -716,6 +717,50 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
     }
     const fullName = `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim();
     return fullName.length > 0 ? `${fullName} (${owner.email})` : owner.email;
+  }
+
+  onOwnerSelected(ownerId: number | null): void {
+    const selectedOwner = this.owners().find((owner) => owner.id === ownerId);
+    if (!selectedOwner) {
+      return;
+    }
+
+    this.unitForm.patchValue({
+      ownerName: selectedOwner.name?.trim() || `${selectedOwner.firstName ?? ''} ${selectedOwner.lastName ?? ''}`.trim(),
+      ownerEmail: selectedOwner.email
+    });
+  }
+
+  onTenantSelected(tenantId: number | null): void {
+    const selectedTenant = this.tenants().find((tenant) => tenant.id === tenantId);
+    if (!selectedTenant) {
+      return;
+    }
+
+    this.unitForm.patchValue({
+      tenantName: selectedTenant.name?.trim() || `${selectedTenant.firstName ?? ''} ${selectedTenant.lastName ?? ''}`.trim(),
+      tenantEmail: selectedTenant.email
+    });
+  }
+
+  private canManageUnitAssignments(property: Property): boolean {
+    if (canManageBuildingOperations(property.currentUserRole)) {
+      return true;
+    }
+
+    if ((property.currentUserRoles ?? []).some((role: string) => canManageBuildingOperations(role))) {
+      return true;
+    }
+
+    const normalizedPermissions = (property.currentUserPermissions ?? []).map((permission: string) => permission.toUpperCase());
+    return normalizedPermissions.some((permission: string) =>
+      permission.includes('UNIT_MANAGE')
+      || permission.includes('UNIT_WRITE')
+      || permission.includes('UNIT_ASSIGN')
+      || permission.includes('BUILDING_MANAGE')
+      || permission.includes('PROPERTY_MANAGE')
+      || permission.includes('PROPERTY_EDIT')
+    );
   }
 
   unitPersonLabel(name?: string, email?: string): string {

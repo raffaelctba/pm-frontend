@@ -3,13 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import Keycloak, { KeycloakProfile } from 'keycloak-js';
 import { from, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { SignupRequest, SignupResponse } from '../models/auth.model';
+import { InvitationInfoResponse, SignupRequest, SignupResponse } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private readonly signupApiUrl = `${environment.apiBaseUrl}/api/auth/signup`;
+  private readonly invitationApiUrl = `${environment.apiBaseUrl}/api/auth/invitations`;
 
   constructor(
     private keycloak: Keycloak,
@@ -17,7 +18,7 @@ export class AuthService {
   ) {}
 
   isLoggedIn(): boolean {
-    return !!this.keycloak.authenticated;
+    return this.keycloak.authenticated ?? false;
   }
 
   getUserProfile(): Observable<KeycloakProfile> {
@@ -32,10 +33,6 @@ export class AuthService {
     return this.keycloak.hasRealmRole(role) || this.keycloak.hasResourceRole(role);
   }
 
-  hasAnyRole(roles: string[]): boolean {
-    return roles.some(role => this.hasRole(role));
-  }
-
   logout(): void {
     this.keycloak.logout({ redirectUri: window.location.origin });
   }
@@ -47,6 +44,10 @@ export class AuthService {
 
   signUp(payload: SignupRequest): Observable<SignupResponse> {
     return this.http.post<SignupResponse>(this.signupApiUrl, payload);
+  }
+
+  getInvitationInfo(token: string): Observable<InvitationInfoResponse> {
+    return this.http.get<InvitationInfoResponse>(`${this.invitationApiUrl}/${encodeURIComponent(token)}`);
   }
 
   getUsername(): string {

@@ -105,35 +105,27 @@ interface LeaseDraft {
                 <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">{{ i18n.translate('property.workspace.buildingManagement') }}</span>
               </div>
 
+              <div class="mb-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
+                Use o menu superior desta propriedade para alternar entre modulos. Esta secao mostra apenas contexto operacional.
+              </div>
+
               <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <a [routerLink]="['/property', currentProperty.id, 'units']" class="rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50">
-                  <p class="font-semibold text-slate-900">Units</p>
-                  <p class="mt-1 text-sm text-slate-500">{{ i18n.translate('property.workspace.units') }}</p>
-                </a>
-                <a [routerLink]="['/property', currentProperty.id, 'finances']" class="rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50">
-                  <p class="font-semibold text-slate-900">{{ i18n.translate('property.workspace.finances') }}</p>
-                  <p class="mt-1 text-sm text-slate-500">Review collection status, invoices and payment flow.</p>
-                </a>
-                <a [routerLink]="['/property', currentProperty.id, 'incidents']" class="rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50">
-                  <p class="font-semibold text-slate-900">{{ i18n.translate('property.workspace.incidents') }}</p>
-                  <p class="mt-1 text-sm text-slate-500">Handle urgent issues and operational alerts.</p>
-                </a>
-                <a [routerLink]="['/property', currentProperty.id, 'work-orders']" class="rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50">
-                  <p class="font-semibold text-slate-900">{{ i18n.translate('property.workspace.workOrders') }}</p>
-                  <p class="mt-1 text-sm text-slate-500">Coordinate maintenance, repairs and progress.</p>
-                </a>
-                <a [routerLink]="['/property', currentProperty.id, 'compliance']" class="rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50">
-                  <p class="font-semibold text-slate-900">{{ i18n.translate('property.workspace.compliance') }}</p>
-                  <p class="mt-1 text-sm text-slate-500">Certificates, inspections and regulatory follow-up.</p>
-                </a>
-                <a [routerLink]="['/property', currentProperty.id, 'documents']" class="rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50">
-                  <p class="font-semibold text-slate-900">{{ i18n.translate('property.workspace.documents') }}</p>
-                  <p class="mt-1 text-sm text-slate-500">Blueprints, records and building files in one place.</p>
-                </a>
-                <a [routerLink]="['/property', currentProperty.id, 'amenities']" class="rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50">
-                  <p class="font-semibold text-slate-900">Amenities</p>
-                  <p class="mt-1 text-sm text-slate-500">Manage reservations, availability windows and paid amenity workflows.</p>
-                </a>
+                <div class="rounded-xl border border-slate-200 p-4">
+                  <p class="text-xs uppercase tracking-wide text-slate-500">Foco imediato</p>
+                  <ul class="mt-2 space-y-2 text-sm text-slate-700">
+                    <li>• Atualizar ocupacao e responsaveis das unidades.</li>
+                    <li>• Revisar cobrancas pendentes e inadimplencia.</li>
+                    <li>• Tratar incidentes e ordens de servico abertas.</li>
+                  </ul>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                  <p class="text-xs uppercase tracking-wide text-slate-500">Governanca</p>
+                  <ul class="mt-2 space-y-2 text-sm text-slate-700">
+                    <li>• Validar compliance e documentacao vigente.</li>
+                    <li>• Confirmar regras de cobranca antes do fechamento.</li>
+                    <li>• Priorizar tarefas criticas desta semana.</li>
+                  </ul>
+                </div>
               </div>
             </div>
 
@@ -274,17 +266,14 @@ interface LeaseDraft {
 
               <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
                 <h2 class="text-xl font-semibold text-slate-900">{{ i18n.translate('property.workspace.privateActions') }}</h2>
-                <div class="mt-4 space-y-3">
-                  <a [routerLink]="['/invoices']" [queryParams]="{ property: currentProperty.id }" class="block rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:border-slate-300 hover:bg-slate-100">
-                    {{ i18n.translate('property.workspace.trackRentInvoices') }}
-                  </a>
-                  <a [routerLink]="['/chat']" [queryParams]="{ property: currentProperty.id }" class="block rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:border-slate-300 hover:bg-slate-100">
-                    {{ i18n.translate('property.workspace.messageTenantOrOwner') }}
-                  </a>
-                  <a [routerLink]="['/properties', currentProperty.id, 'edit']" class="block rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:border-slate-300 hover:bg-slate-100">
-                    {{ i18n.translate('property.workspace.adjustPropertyDetails') }}
-                  </a>
-                </div>
+                <p class="mt-3 text-xs text-slate-600">
+                  Navegue pelos modulos usando o menu superior. Aqui voce acompanha os proximos passos deste imovel.
+                </p>
+                <ul class="mt-4 space-y-3 text-sm text-slate-700">
+                  <li class="rounded-xl border border-slate-200 bg-white px-4 py-3">• Confirmar dados do inquilino e vigencia contratual.</li>
+                  <li class="rounded-xl border border-slate-200 bg-white px-4 py-3">• Revisar pendencias de pagamento do mes atual.</li>
+                  <li class="rounded-xl border border-slate-200 bg-white px-4 py-3">• Registrar manutencoes preventivas planejadas.</li>
+                </ul>
               </div>
 
               <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

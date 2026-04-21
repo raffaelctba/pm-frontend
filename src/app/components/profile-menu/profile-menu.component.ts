@@ -14,9 +14,9 @@ import { environment } from '../../../environments/environment';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="relative" (click)="$event.stopPropagation()">
-      <button type="button" class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" (click)="toggleMenu()">
+      <button type="button" class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800" (click)="toggleMenu()">
         @if (avatarDataUrl()) {
-          <img [src]="avatarDataUrl()!" alt="Profile" class="h-8 w-8 rounded-full object-cover border border-slate-200" />
+          <img [src]="avatarDataUrl()!" alt="Profile" class="h-8 w-8 rounded-full border border-slate-200 object-cover dark:border-slate-700" />
         } @else {
           <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-xs font-semibold text-white">
             {{ initials() }}
@@ -26,30 +26,30 @@ import { environment } from '../../../environments/environment';
       </button>
 
       @if (menuOpen()) {
-        <div class="absolute right-0 z-50 mt-2 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-xl">
-          <div class="border-b border-slate-200 pb-3">
-            <p class="text-xs uppercase tracking-wide text-slate-500">{{ t('profile.title') }}</p>
-            <p class="mt-1 text-sm font-semibold text-slate-900">{{ displayName() }}</p>
-            <p class="text-xs text-slate-600">{{ email() }}</p>
-            <p class="text-xs text-slate-500">{{ username() }}</p>
+        <div class="absolute right-0 z-50 mt-2 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/40">
+          <div class="border-b border-slate-200 pb-3 dark:border-slate-700">
+            <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ t('profile.title') }}</p>
+            <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ displayName() }}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300">{{ email() }}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">{{ username() }}</p>
           </div>
 
           <div class="mt-3 space-y-3">
-            <div class="rounded-lg border border-slate-200 p-3">
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ t('profile.title') }}</p>
+            <div class="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ t('profile.title') }}</p>
               <input #avatarInput type="file" accept="image/*" class="hidden" (change)="onAvatarSelected($event)" />
               <div class="mt-2 flex gap-2">
-                <button type="button" class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50" (click)="avatarInput.click()">
+                <button type="button" class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800" (click)="avatarInput.click()">
                   {{ t('profile.uploadPicture') }}
                 </button>
-                <button type="button" class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50" (click)="openAccountSettings()">
+                <button type="button" class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800" (click)="openAccountSettings()">
                   {{ t('profile.editInfo') }}
                 </button>
               </div>
             </div>
 
             <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ t('profile.theme') }}</p>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ t('profile.theme') }}</p>
               <div class="mt-2 flex gap-2">
                 @for (mode of themeModes; track mode) {
                   <button
@@ -57,21 +57,20 @@ import { environment } from '../../../environments/environment';
                     class="rounded-md border px-2 py-1 text-xs"
                     [class.border-primary-600]="preferences.themeMode() === mode"
                     [class.text-primary-700]="preferences.themeMode() === mode"
-                    [class.border-slate-300]="preferences.themeMode() !== mode"
-                    [class.text-slate-600]="preferences.themeMode() !== mode"
+                    [ngClass]="preferences.themeMode() !== mode ? 'border-slate-300 text-slate-600 dark:border-slate-600 dark:text-slate-300' : ''"
                     (click)="setTheme(mode)"
                   >
                     {{ modeLabel(mode) }}
                   </button>
                 }
               </div>
-              <button type="button" class="mt-2 text-xs text-primary-700 hover:text-primary-800" (click)="preferences.toggleDarkMode()">
+              <button type="button" class="mt-2 text-xs text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200" (click)="preferences.toggleDarkMode()">
                 {{ preferences.darkMode() ? t('profile.dark.disable') : t('profile.dark.enable') }}
               </button>
             </div>
 
             <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ t('nav.language') }}</p>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ t('nav.language') }}</p>
               <div class="mt-2 flex flex-wrap gap-2">
                 @for (lang of i18n.supportedLanguages; track lang) {
                   <button
@@ -79,8 +78,7 @@ import { environment } from '../../../environments/environment';
                     class="rounded-md border px-2 py-1 text-xs"
                     [class.border-primary-600]="currentLanguage() === lang"
                     [class.text-primary-700]="currentLanguage() === lang"
-                    [class.border-slate-300]="currentLanguage() !== lang"
-                    [class.text-slate-600]="currentLanguage() !== lang"
+                    [ngClass]="currentLanguage() !== lang ? 'border-slate-300 text-slate-600 dark:border-slate-600 dark:text-slate-300' : ''"
                     (click)="setLanguage(lang)"
                   >
                     {{ t('lang.' + lang) }}
@@ -90,7 +88,7 @@ import { environment } from '../../../environments/environment';
             </div>
           </div>
 
-          <div class="mt-4 border-t border-slate-200 pt-3">
+          <div class="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
             <button type="button" class="btn btn-secondary w-full" (click)="logout()">{{ t('nav.logout') }}</button>
           </div>
         </div>

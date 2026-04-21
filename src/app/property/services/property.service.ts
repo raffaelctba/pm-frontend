@@ -136,10 +136,14 @@ export class PropertyDashboardService {
             addressLabel: [property.address?.street, property.address?.number, property.address?.city, property.address?.state]
               .filter(Boolean)
               .join(' · ') || 'Address not available',
-            userRolesLabel: property.currentUserRoles && property.currentUserRoles.length > 0
-              ? property.currentUserRoles.join(', ')
-              : property.currentUserRole || 'No role',
-            userPermissions: property.currentUserPermissions ?? []
+            userRolesLabel: (property.currentUserRoles?.length
+              ? property.currentUserRoles
+              : property.currentUserRole
+                ? [property.currentUserRole]
+                : [])
+              .filter((role: string) => !!role)
+              .join(', '),
+            userPermissions: (property.currentUserPermissions ?? []).filter((permission: string) => !!permission)
           },
           summary: {
             valuationLabel: isMultiUnitProperty(property.propertyType) ? `Building • ${totalUnits} units` : property.propertyType,

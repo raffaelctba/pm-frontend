@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { InvitationInfoResponse } from '../../../models/auth.model';
 
 @Component({
   selector: 'app-signup',
@@ -14,6 +15,21 @@ import { AuthService } from '../../../services/auth.service';
       <p class="mt-2 text-sm text-slate-600">
         Register with MyProperty to access property operations, invoicing and tenant communication tools.
       </p>
+
+      @if (invitationLoading) {
+        <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+          Loading invitation details...
+        </div>
+      }
+
+      @if (invitationInfo) {
+        <div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-3 text-sm text-blue-900">
+          <p class="font-semibold">Invitation detected</p>
+          <p class="mt-1">{{ invitationInfo.buildingName }} · Unit {{ invitationInfo.unitNumber }}</p>
+          <p>Role: {{ invitationInfo.invitationRole }}</p>
+          <p>Status: {{ invitationInfo.status }}</p>
+        </div>
+      }
 
       <form [formGroup]="signupForm" (ngSubmit)="submit()" class="mt-6 space-y-4">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -34,8 +50,9 @@ import { AuthService } from '../../../services/auth.service';
 
         <div>
           <label class="label" for="email">Email</label>
-          <input id="email" class="input" type="email" formControlName="email" />
+          <input id="email" class="input" type="email" formControlName="email" [readonly]="emailLocked" />
           <p *ngIf="emailTouchedAndInvalid" class="mt-1 text-xs text-red-600">Valid email is required.</p>
+          <p *ngIf="emailLocked" class="mt-1 text-xs text-slate-500">This email comes from your invitation.</p>
         </div>
 
         <div>
@@ -75,12 +92,18 @@ import { AuthService } from '../../../services/auth.service';
     </section>
   `
 })
-export class SignupComponent {
+export class SignupComponent implements OnInit {
   submitting = false;
   successMessage = '';
   errorMessage = '';
+  invitationLoading = false;
+  invitationInfo: InvitationInfoResponse | null = null;
+  invitationToken = '';
+  emailLocked = false;
 
   readonly signupForm;
+
+  private readonly route = inject(ActivatedRoute);
 
   constructor(
     private readonly fb: FormBuilder,
@@ -94,6 +117,35 @@ export class SignupComponent {
       phone: [''],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
+    });
+  }
+
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const token = params.get('invitationToken')?.trim() ?? '';
+      this.invitationToken = token;
+
+      if (!token) {
+        this.emailLocked = false;
+        this.invitationInfo = null;
+        return;
+      }
+
+      this.invitationLoading = true;
+      this.authService.getInvitationInfo(token).subscribe({
+        next: (info) => {
+          this.invitationInfo = info;
+          this.signupForm.controls.email.setValue(info.inviteeEmail ?? '');
+          this.signupForm.controls.email.disable({ emitEvent: false });
+          this.emailLocked = true;
+          this.invitationLoading = false;
+        },
+        error: (error) => {
+          this.errorMessage = error?.error?.message ?? 'Invalid or expired invitation link.';
+          this.invitationLoading = false;
+          this.emailLocked = false;
+        }
+      });
     });
   }
 
@@ -131,11 +183,17 @@ export class SignupComponent {
       firstName: value.firstName || undefined,
       lastName: value.lastName || undefined,
       phone: value.phone || undefined,
-      username: value.username || undefined
+      username: value.username || undefined,
+      invitationToken: this.invitationToken || undefined
     }).subscribe({
       next: (response) => {
         this.successMessage = `${response.message}. You can now login.`;
         this.signupForm.reset();
+        if (this.emailLocked) {
+          this.signupForm.controls.email.disable({ emitEvent: false });
+        } else {
+          this.signupForm.controls.email.enable({ emitEvent: false });
+        }
         this.submitting = false;
         window.setTimeout(() => this.login(), 800);
       },

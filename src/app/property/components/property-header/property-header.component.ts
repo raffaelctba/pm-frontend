@@ -42,7 +42,7 @@ export class PropertyHeaderComponent {
     }
     return this.header.userRolesLabel
       .split(', ')
-      .filter(role => role && role !== 'No role');
+        .filter((role: string) => role && role !== 'No role');
   }
 
   getPropertyRoleLabelKey(role: string): string {

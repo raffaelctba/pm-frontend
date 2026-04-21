@@ -71,6 +71,9 @@ export interface UnitAssigneeOptions {
 
 export type InvoiceStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'PARTIALLY_PAID';
 
+export type UnitInvitationRole = 'OWNER' | 'TENANT';
+export type UnitInvitationStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
+
 export interface UnitPaymentHistoryItem {
   invoiceId: number;
   invoiceNumber: string;
@@ -109,6 +112,7 @@ export interface BuildingUnitDetails {
   currencyCode?: string;
   paymentHistory: UnitPaymentHistoryItem[];
   recentActivity: UnitActivityItem[];
+  pendingInvitations?: UnitInvitationSummary[];
 }
 
 export interface UnitTenantContact {
@@ -125,5 +129,14 @@ export interface UnitActivityItem {
   description?: string;
   status?: string;
   eventAt: string;
+}
+
+export interface UnitInvitationSummary {
+  invitationId: number;
+  invitationRole: UnitInvitationRole;
+  inviteeName?: string;
+  inviteeEmail?: string;
+  status: UnitInvitationStatus;
+  expiresAt?: string;
 }
 

@@ -59,5 +59,16 @@ describe('BuildingUnitService', () => {
     expect(req.request.method).toBe('GET');
     req.flush({});
   });
+
+  it('posts to resend a pending unit invitation', () => {
+    service.resendUnitInvitation(19, 21, 'TENANT').subscribe();
+
+    const req = httpMock.expectOne((request) =>
+      request.url.includes('/api/buildings/19/units/21/invitations/TENANT/resend')
+    );
+
+    expect(req.request.method).toBe('POST');
+    req.flush({});
+  });
 });
 

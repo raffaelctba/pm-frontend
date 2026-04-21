@@ -1,33 +1,24 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BuildingUnitDetails, InvoiceStatus, UnitStatus, UnitTenantContact } from '../../../models/building/building-unit.model';
 import { BuildingUnitService } from '../../../services/building/building-unit.service';
 import { I18nService } from '../../../services/i18n.service';
-import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-unit-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatSlideToggleModule, MatSnackBarModule],
+  imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="mx-auto max-w-7xl px-4 py-6">
       <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-2xl font-bold text-slate-900">{{ i18n.translate('unit.dashboard.title') }}</h1>
-            @if (elevatedVisibility()) {
-              <span class="rounded-full bg-indigo-100 px-2 py-1 text-[11px] font-semibold text-indigo-800">
-                {{ i18n.translate('unit.dashboard.elevatedModeActive') }}
-              </span>
-            }
-          </div>
+          <h1 class="text-2xl font-bold text-slate-900">{{ i18n.translate('unit.dashboard.title') }}</h1>
           <p class="text-sm text-slate-600">{{ i18n.translate('unit.dashboard.subtitle') }}</p>
         </div>
         <div class="flex gap-2">
@@ -46,16 +37,6 @@ import { combineLatest } from 'rxjs';
           </button>
           <button mat-flat-button color="primary" (click)="loadDetails()" [disabled]="loading()">{{ i18n.translate('unit.dashboard.refresh') }}</button>
         </div>
-      </div>
-
-      <div class="mb-4 flex flex-wrap items-center justify-between gap-2 rounded border border-slate-200 bg-slate-50 px-3 py-2">
-        <p class="text-xs text-slate-600">{{ i18n.translate('unit.dashboard.subtenantVisibilityHint') }}</p>
-        <mat-slide-toggle
-          [checked]="elevatedVisibility()"
-          (change)="setElevatedVisibility($event.checked)"
-        >
-          {{ i18n.translate('unit.dashboard.elevatedVisibility') }}
-        </mat-slide-toggle>
       </div>
 
       @if (errorMessage()) {
@@ -200,7 +181,6 @@ import { combineLatest } from 'rxjs';
 })
 export class UnitDashboardComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly unitService = inject(BuildingUnitService);
   private readonly snackBar = inject(MatSnackBar);
   readonly i18n = inject(I18nService);
@@ -210,7 +190,6 @@ export class UnitDashboardComponent implements OnInit {
   readonly loading = signal<boolean>(true);
   readonly errorMessage = signal<string>('');
   readonly unitDetails = signal<BuildingUnitDetails | null>(null);
-  readonly elevatedVisibility = signal<boolean>(false);
 
   readonly collectionHealth = computed(() => {
     const details = this.unitDetails();
@@ -221,11 +200,10 @@ export class UnitDashboardComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(([params, queryParams]) => {
+    this.route.paramMap.subscribe((params) => {
       const rawBuildingId = params.get('id') ?? this.route.parent?.snapshot.paramMap.get('id') ?? '0';
       this.buildingId.set(Number(rawBuildingId));
       this.unitId.set(Number(params.get('unitId') || 0));
-      this.elevatedVisibility.set(queryParams.get('elevatedVisibility') === 'true');
       this.loadDetails();
     });
   }
@@ -240,9 +218,7 @@ export class UnitDashboardComponent implements OnInit {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    this.unitService.getUnitDetails(this.buildingId(), this.unitId(), {
-      elevatedVisibility: this.elevatedVisibility()
-    }).subscribe({
+    this.unitService.getUnitDetails(this.buildingId(), this.unitId()).subscribe({
       next: (details) => {
         this.unitDetails.set(details);
         this.loading.set(false);
@@ -251,14 +227,6 @@ export class UnitDashboardComponent implements OnInit {
         this.errorMessage.set(error?.error?.message ?? 'Could not load the unit dashboard.');
         this.loading.set(false);
       }
-    });
-  }
-
-  setElevatedVisibility(value: boolean): void {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { elevatedVisibility: value ? 'true' : null },
-      queryParamsHandling: 'merge'
     });
   }
 

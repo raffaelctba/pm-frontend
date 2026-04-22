@@ -36,7 +36,8 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./pages/properties/property-list/property-list.component').then(m => m.PropertyListComponent)
+        redirectTo: '/portfolio',
+        pathMatch: 'full'
       },
       {
         path: 'new',

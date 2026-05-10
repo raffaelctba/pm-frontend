@@ -27,10 +27,6 @@ export class BuildingUnitService {
     );
   }
 
-  getAssignableUsers(buildingId: number): Observable<UnitAssigneeOptions> {
-    return this.http.get<UnitAssigneeOptions>(`${this.apiUrl}/${buildingId}/units/assignees`);
-  }
-
   getUnit(buildingId: number, unitId: number, options?: UnitVisibilityOptions): Observable<BuildingUnit> {
     return this.http.get<BuildingUnit>(`${this.apiUrl}/${buildingId}/units/${unitId}`, {
       params: this.buildVisibilityParams(options)
@@ -53,6 +49,10 @@ export class BuildingUnitService {
 
   deleteUnit(buildingId: number, unitId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${buildingId}/units/${unitId}`);
+  }
+
+  getAssignableUsers(buildingId: number): Observable<UnitAssigneeOptions> {
+    return this.http.get<UnitAssigneeOptions>(`${this.apiUrl}/${buildingId}/assignable-users`);
   }
 
   private buildVisibilityParams(options?: UnitVisibilityOptions): HttpParams | undefined {

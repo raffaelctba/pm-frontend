@@ -3,7 +3,7 @@ export const environment = {
   apiBaseUrl: 'http://localhost:8081',
   wsBaseUrl: 'http://localhost:8081',
   keycloakUrl: 'http://localhost:8083',
-  keycloakRealm: 'myproperty',
-  keycloakClientId: 'myproperty-angular-frontend'
+  keycloakRealm: 'mybuilding',
+  keycloakClientId: 'mybuilding-angular-frontend'
 };
 

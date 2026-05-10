@@ -23,6 +23,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'building/:buildingId',
+    loadChildren: () => import('./navigation/building.routes').then(m => m.BUILDING_ROUTES),
+    canActivate: [authGuard]
+  },
+  {
     path: 'dashboard',
     redirectTo: 'portfolio',
     pathMatch: 'full'
@@ -113,7 +118,7 @@ export const routes: Routes = [
       },
       {
         path: ':id/edit',
-        loadComponent: () => import('./pages/properties/property-form/property-form.component').then(m => m.PropertyFormComponent)
+        redirectTo: '/property/:id/edit'
       }
     ],
     canActivate: [authGuard]

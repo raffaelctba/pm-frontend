@@ -20,10 +20,12 @@ export interface BuildingUnit {
   ownerId?: number;
   ownerName?: string;
   ownerEmail?: string;
+  ownerPhone?: string;
   tenantId?: number;
   tenantIds?: number[];
   tenantName?: string;
   tenantEmail?: string;
+  tenantPhone?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -50,9 +52,11 @@ export interface BuildingUnitRequest {
   ownerId?: number | null;
   ownerName?: string | null;
   ownerEmail?: string | null;
+  ownerPhone?: string | null;
   tenantId?: number | null;
   tenantName?: string | null;
   tenantEmail?: string | null;
+  tenantPhone?: string | null;
 }
 
 export interface UnitAssignee {
@@ -101,8 +105,10 @@ export interface BuildingUnitDetails {
   occupied: boolean;
   ownerName?: string;
   ownerEmail?: string;
+  ownerPhone?: string;
   tenantName?: string;
   tenantEmail?: string;
+  tenantPhone?: string;
   tenants?: UnitTenantContact[];
   totalInvoices: number;
   paidInvoices: number;
@@ -119,6 +125,7 @@ export interface UnitTenantContact {
   userId?: number;
   name?: string;
   email?: string;
+  phone?: string;
 }
 
 export type UnitActivityType = 'INVOICE_STATUS' | 'PAYMENT' | 'INCIDENT';

@@ -20,7 +20,7 @@ export class PropertyDashboardComponent {
   readonly i18n = inject(I18nService);
 
   readonly state$: Observable<{ loading: boolean; dashboardVm: PropertyDashboardVm | null }> = this.route.paramMap.pipe(
-    map((params) => Number(params.get('id'))),
+    map((params) => Number(params.get('id') ?? params.get('buildingId'))),
     switchMap((id) => {
       if (!Number.isFinite(id) || id <= 0) {
         return of({ loading: false, dashboardVm: null });
@@ -29,7 +29,12 @@ export class PropertyDashboardComponent {
       this.dashboardContext.setPropertyContext(id);
 
       return this.propertyDashboardService.getPropertyDashboardVm(id).pipe(
-        map((dashboardVm) => ({ loading: false, dashboardVm })),
+        map((dashboardVm) => {
+          if (dashboardVm && dashboardVm.header && !dashboardVm.header.id) {
+            dashboardVm.header.id = dashboardVm.id;
+          }
+          return { loading: false, dashboardVm };
+        }),
         tap(({ dashboardVm }) => {
           if (dashboardVm) {
             this.dashboardContext.setPropertyContext(dashboardVm.id);

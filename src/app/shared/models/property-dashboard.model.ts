@@ -1,4 +1,5 @@
 export interface PropertyHeaderVm {
+  id?: number;
   name: string;
   breadcrumbLabel: string;
   subtitle: string;

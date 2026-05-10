@@ -41,179 +41,176 @@ import { Property } from '../../../models/property.model';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="mx-auto max-w-6xl px-4 py-6">
-      <div class="mb-4 flex items-center justify-between">
+    <div class="mx-auto max-w-7xl px-4 py-8">
+      <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900">{{ i18n.translate('building.units.title') }}</h1>
-          <p class="text-sm text-slate-600">{{ i18n.translate('building.units.subtitle') }}</p>
+          <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">{{ i18n.translate('building.units.title') }}</h1>
+          <p class="mt-1 text-base text-slate-500">{{ i18n.translate('building.units.subtitle') }}</p>
         </div>
-        <a [routerLink]="['/property', buildingId()]" mat-stroked-button>{{ i18n.translate('building.units.backToProperty') }}</a>
+        <div class="flex items-center gap-3">
+          <a [routerLink]="['/property', buildingId()]" mat-stroked-button class="rounded-lg">
+            <mat-icon class="mr-1">arrow_back</mat-icon>
+            {{ i18n.translate('building.units.backToProperty') }}
+          </a>
+        </div>
       </div>
 
-      <mat-card class="mb-6 p-4">
-        @if (!canManageUnits()) {
-          <p class="mb-4 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            {{ i18n.translate('building.access.readOnlyNotice') }}
-          </p>
-        }
-        @if (canManageUnits()) {
-        @if (!editingUnitId() && !createFormOpen()) {
-          <div class="flex items-center justify-between gap-3">
-            <p class="text-sm text-slate-600">{{ i18n.translate('building.units.createTitle') }}</p>
-            <button mat-flat-button color="primary" type="button" (click)="openCreateForm()">
-              {{ i18n.translate('building.units.createUnit') }}
+      @if (createFormOpen()) {
+        <mat-card class="mb-8 overflow-hidden border-none shadow-lg ring-1 ring-slate-200">
+          <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-lg font-bold text-slate-800">
+              {{ editingUnitId() ? i18n.translate('building.units.editTitle') : i18n.translate('building.units.createTitle') }}
+            </h2>
+            <button mat-icon-button (click)="cancelEdit()">
+              <mat-icon>close</mat-icon>
             </button>
           </div>
-        } @else {
-        <h2 class="mb-4 text-lg font-semibold">{{ editingUnitId() ? i18n.translate('building.units.editTitle') : i18n.translate('building.units.createTitle') }}</h2>
-        <form [formGroup]="unitForm" (ngSubmit)="submitUnit()" class="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <mat-form-field appearance="outline">
-            <mat-label>{{ i18n.translate('building.units.unitNumber') }}</mat-label>
-            <input matInput formControlName="unitNumber" />
-          </mat-form-field>
+          <div class="p-6">
+            <form [formGroup]="unitForm" (ngSubmit)="submitUnit()" class="grid grid-cols-1 gap-6 md:grid-cols-4">
+              <!-- Form fields remain the same but with slightly better container spacing -->
+              <mat-form-field appearance="outline">
+                <mat-label>{{ i18n.translate('building.units.unitNumber') }}</mat-label>
+                <input matInput formControlName="unitNumber" />
+              </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>{{ i18n.translate('building.units.unitType') }}</mat-label>
-            <input matInput formControlName="unitType" [placeholder]="i18n.translate('unit.type.residential')" />
-          </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ i18n.translate('building.units.unitType') }}</mat-label>
+                <input matInput formControlName="unitType" [placeholder]="i18n.translate('unit.type.residential')" />
+              </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>{{ i18n.translate('building.units.status') }}</mat-label>
-            <mat-select formControlName="status">
-              @for (status of statuses; track status) {
-                <mat-option [value]="status">{{ getUnitStatusLabel(status) }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ i18n.translate('building.units.status') }}</mat-label>
+                <mat-select formControlName="status">
+                  @for (status of statuses; track status) {
+                    <mat-option [value]="status">{{ getUnitStatusLabel(status) }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>{{ i18n.translate('building.units.floor') }}</mat-label>
-            <input matInput type="number" formControlName="floorNumber" />
-          </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ i18n.translate('building.units.floor') }}</mat-label>
+                <input matInput type="number" formControlName="floorNumber" />
+              </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>{{ i18n.translate('building.units.area') }}</mat-label>
-            <input matInput type="number" formControlName="areaSize" />
-          </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ i18n.translate('building.units.area') }}</mat-label>
+                <input matInput type="number" formControlName="areaSize" />
+              </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>{{ i18n.translate('building.units.monthlyFeeOverride') }}</mat-label>
-            <input matInput type="number" step="0.01" formControlName="monthlyFeeOverride" />
-            <mat-hint>{{ i18n.translate('building.units.monthlyFeeOverrideHint') }}</mat-hint>
-          </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ i18n.translate('building.units.monthlyFeeOverride') }}</mat-label>
+                <input matInput type="number" step="0.01" formControlName="monthlyFeeOverride" />
+              </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Late fee override (%)</mat-label>
-            <input matInput type="number" step="0.01" formControlName="lateFeePercentageOverride" />
-          </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Late fee override (%)</mat-label>
+                <input matInput type="number" step="0.01" formControlName="lateFeePercentageOverride" />
+              </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Interest override (%/month)</mat-label>
-            <input matInput type="number" step="0.01" formControlName="interestRateMonthlyOverride" />
-          </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Interest override (%/month)</mat-label>
+                <input matInput type="number" step="0.01" formControlName="interestRateMonthlyOverride" />
+              </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Grace period override (days)</mat-label>
-            <input matInput type="number" formControlName="gracePeriodDaysOverride" />
-          </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Grace period override (days)</mat-label>
+                <input matInput type="number" formControlName="gracePeriodDaysOverride" />
+              </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>{{ i18n.translate('building.units.bedrooms') }}</mat-label>
-            <input matInput type="number" formControlName="bedrooms" />
-          </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ i18n.translate('building.units.bedrooms') }}</mat-label>
+                <input matInput type="number" formControlName="bedrooms" />
+              </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>{{ i18n.translate('building.units.bathrooms') }}</mat-label>
-            <input matInput type="number" formControlName="bathrooms" />
-          </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ i18n.translate('building.units.bathrooms') }}</mat-label>
+                <input matInput type="number" formControlName="bathrooms" />
+              </mat-form-field>
 
-          <mat-slide-toggle formControlName="occupied" class="self-center">{{ i18n.translate('building.units.occupied') }}</mat-slide-toggle>
+              <div class="flex items-center px-2">
+                <mat-slide-toggle formControlName="occupied">{{ i18n.translate('building.units.occupied') }}</mat-slide-toggle>
+              </div>
 
-          @if (owners().length > 0) {
-            <mat-form-field appearance="outline" class="md:col-span-2">
-              <mat-label>{{ i18n.translate('building.units.ownerExisting') }}</mat-label>
-              <mat-select formControlName="ownerId" (valueChange)="onOwnerSelected($event)">
-                <mat-option [value]="null">{{ i18n.translate('common.none') }}</mat-option>
-                @for (owner of owners(); track owner.id) {
-                  <mat-option [value]="owner.id">{{ ownerDisplayName(owner) }}</mat-option>
-                }
-              </mat-select>
-              <mat-hint>{{ i18n.translate('building.units.ownerHint') }}</mat-hint>
-            </mat-form-field>
-          }
+              <div class="md:col-span-2 grid grid-cols-1 gap-4">
+                <h3 class="text-sm font-semibold text-slate-700 col-span-full border-b border-slate-100 pb-1 mb-2">{{ i18n.translate('unit.dashboard.ownerProfile') }}</h3>
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ i18n.translate('building.units.ownerName') }}</mat-label>
+                  <input matInput formControlName="ownerName" />
+                </mat-form-field>
 
-          <mat-form-field appearance="outline" class="md:col-span-2">
-            <mat-label>{{ i18n.translate('building.units.ownerName') }}</mat-label>
-            <input matInput formControlName="ownerName" [placeholder]="i18n.translate('common.optional')" />
-          </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ i18n.translate('building.units.ownerEmail') }}</mat-label>
+                  <input matInput formControlName="ownerEmail" />
+                </mat-form-field>
 
-          <mat-form-field appearance="outline" class="md:col-span-2">
-            <mat-label>{{ i18n.translate('building.units.ownerEmail') }}</mat-label>
-            <input matInput formControlName="ownerEmail" placeholder="owner@example.com" />
-            @if (unitForm.controls.ownerEmail.invalid && unitForm.controls.ownerEmail.touched) {
-              <mat-error>{{ i18n.translate('signup.error.email') }}</mat-error>
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ i18n.translate('common.phone') }}</mat-label>
+                  <input matInput formControlName="ownerPhone" />
+                </mat-form-field>
+              </div>
+
+              <div class="md:col-span-2 grid grid-cols-1 gap-4">
+                <h3 class="text-sm font-semibold text-slate-700 col-span-full border-b border-slate-100 pb-1 mb-2">{{ i18n.translate('unit.dashboard.tenantProfile') }}</h3>
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ i18n.translate('building.units.tenantName') }}</mat-label>
+                  <input matInput formControlName="tenantName" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ i18n.translate('building.units.tenantEmail') }}</mat-label>
+                  <input matInput formControlName="tenantEmail" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ i18n.translate('common.phone') }}</mat-label>
+                  <input matInput formControlName="tenantPhone" />
+                </mat-form-field>
+              </div>
+
+              <div class="md:col-span-4 flex justify-end gap-3 mt-4 border-t border-slate-100 pt-6">
+                <button mat-button type="button" (click)="cancelEdit()" [disabled]="loading()">
+                  {{ i18n.translate('building.units.cancel') }}
+                </button>
+                <button mat-flat-button color="primary" type="submit" [disabled]="unitForm.invalid || loading()" class="px-8 rounded-lg">
+                  {{ editingUnitId() ? i18n.translate('building.units.saveChanges') : i18n.translate('building.units.createUnit') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </mat-card>
+      }
+
+
+      <mat-card class="overflow-hidden border-none shadow-md">
+        <div class="border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800">{{ i18n.translate('building.units.units') }}</h2>
+            <p class="text-xs text-slate-500">{{ totalElements() }} {{ i18n.translate('building.units.unitsFound') || 'units' }}</p>
+          </div>
+          <div class="flex gap-2">
+            @if (canManageUnits()) {
+              <button mat-flat-button color="primary" (click)="openCreateForm()">
+                <mat-icon class="mr-1">add</mat-icon>
+                {{ i18n.translate('building.units.createUnit') }}
+              </button>
             }
-          </mat-form-field>
-
-          @if (tenants().length > 0) {
-            <mat-form-field appearance="outline" class="md:col-span-2">
-              <mat-label>{{ i18n.translate('building.units.tenantExisting') }}</mat-label>
-              <mat-select formControlName="tenantId" (valueChange)="onTenantSelected($event)">
-                <mat-option [value]="null">{{ i18n.translate('common.none') }}</mat-option>
-                @for (tenant of tenants(); track tenant.id) {
-                  <mat-option [value]="tenant.id">{{ ownerDisplayName(tenant) }}</mat-option>
-                }
-              </mat-select>
-              <mat-hint>{{ i18n.translate('building.units.tenantHint') }}</mat-hint>
-            </mat-form-field>
-          }
-
-          <mat-form-field appearance="outline" class="md:col-span-2">
-            <mat-label>{{ i18n.translate('building.units.tenantName') }}</mat-label>
-            <input matInput formControlName="tenantName" [placeholder]="i18n.translate('common.optional')" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="md:col-span-2">
-            <mat-label>{{ i18n.translate('building.units.tenantEmail') }}</mat-label>
-            <input matInput formControlName="tenantEmail" placeholder="tenant@example.com" />
-            @if (unitForm.controls.tenantEmail.invalid && unitForm.controls.tenantEmail.touched) {
-              <mat-error>{{ i18n.translate('signup.error.email') }}</mat-error>
-            }
-          </mat-form-field>
-
-          @if (ownersLoading()) {
-            <p class="md:col-span-4 text-xs text-slate-500">{{ i18n.translate('building.units.loadingOwners') }}</p>
-          }
-
-          @if (assigneeLoadError()) {
-            <p class="md:col-span-4 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">{{ assigneeLoadError() }}</p>
-          }
-
-          <div class="md:col-span-4 flex justify-end">
-            <button mat-stroked-button type="button" class="mr-2" (click)="cancelEdit()" [disabled]="loading()">
-              {{ i18n.translate('building.units.cancel') }}
-            </button>
-            <button mat-flat-button color="primary" type="submit" [disabled]="unitForm.invalid || loading()">
-              {{ editingUnitId() ? i18n.translate('building.units.saveChanges') : i18n.translate('building.units.createUnit') }}
+            <button mat-icon-button (click)="loadUnits()" [disabled]="loading()">
+              <mat-icon>refresh</mat-icon>
             </button>
           </div>
-        </form>
-        }
-        }
-      </mat-card>
-
-      <mat-card class="p-4">
-        <div class="mb-3 flex items-center justify-between">
-          <h2 class="text-lg font-semibold">{{ i18n.translate('building.units.units') }} ({{ totalElements() }})</h2>
-          <button mat-stroked-button (click)="loadUnits()" [disabled]="loading()">{{ i18n.translate('building.units.refresh') }}</button>
         </div>
 
         @if (errorMessage()) {
-          <p class="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{{ errorMessage() }}</p>
+          <div class="m-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 flex items-center">
+            <mat-icon class="mr-2 text-red-500">error_outline</mat-icon>
+            {{ errorMessage() }}
+          </div>
         }
 
         @if (loading()) {
-          <p class="text-sm text-slate-500">{{ i18n.translate('building.units.loadingUnits') }}</p>
+          <div class="flex flex-col items-center justify-center py-12">
+            <p class="text-sm text-slate-500">{{ i18n.translate('building.units.loadingUnits') }}</p>
+          </div>
         }
 
         @if (!loading()) {
@@ -222,7 +219,7 @@ import { Property } from '../../../models/property.model';
               <ng-container matColumnDef="unitNumber">
                 <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.units.unitNumber') }}</th>
                 <td mat-cell *matCellDef="let row">
-                  <a class="text-blue-700 hover:text-blue-900 hover:underline" [routerLink]="['/property', buildingId(), 'units', row.id]">
+                  <a class="font-bold text-blue-600 hover:text-blue-800 hover:underline" [routerLink]="['/property', buildingId(), 'units', row.id]">
                     {{ row.unitNumber }}
                   </a>
                 </td>
@@ -235,17 +232,35 @@ import { Property } from '../../../models/property.model';
 
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.units.status') }}</th>
-                <td mat-cell *matCellDef="let row">{{ getUnitStatusLabel(row.status) }}</td>
+                <td mat-cell *matCellDef="let row">
+                  <span class="rounded-full px-2.5 py-1 text-xs font-medium" [ngClass]="statusBadgeClass(row.status)">
+                    {{ getUnitStatusLabel(row.status) }}
+                  </span>
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="owner">
                 <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.units.ownerName') }}</th>
-                <td mat-cell *matCellDef="let row">{{ unitPersonLabel(row.ownerName, row.ownerEmail) }}</td>
+                <td mat-cell *matCellDef="let row">
+                  <div class="flex flex-col py-2">
+                    <span class="font-medium text-slate-900">{{ row.ownerName || '-' }}</span>
+                    @if (row.ownerEmail) {
+                      <span class="text-xs text-slate-500">{{ row.ownerEmail }}</span>
+                    }
+                  </div>
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="tenant">
                 <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.units.tenantName') }}</th>
-                <td mat-cell *matCellDef="let row">{{ unitPersonLabel(row.tenantName, row.tenantEmail) }}</td>
+                <td mat-cell *matCellDef="let row">
+                  <div class="flex flex-col py-2">
+                    <span class="font-medium text-slate-900">{{ row.tenantName || '-' }}</span>
+                    @if (row.tenantEmail) {
+                      <span class="text-xs text-slate-500">{{ row.tenantEmail }}</span>
+                    }
+                  </div>
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="floorNumber">
@@ -258,31 +273,6 @@ import { Property } from '../../../models/property.model';
                 <td mat-cell *matCellDef="let row">{{ row.occupied ? i18n.translate('common.yes') : i18n.translate('common.no') }}</td>
               </ng-container>
 
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>{{ i18n.translate('building.workOrders.actions') }}</th>
-                <td mat-cell *matCellDef="let row">
-                  <button mat-icon-button color="primary" (click)="startEdit(row)" [attr.aria-label]="i18n.translate('building.units.edit')" [disabled]="!canManageUnits()">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <a
-                    mat-icon-button
-                    [routerLink]="['/property', buildingId(), 'units', row.id]"
-                    [queryParams]="dashboardVisibilityQueryParams(row.id)"
-                    [attr.aria-label]="i18n.translate('building.units.openDashboard')"
-                  >
-                    <mat-icon>open_in_new</mat-icon>
-                  </a>
-                  <a mat-icon-button [routerLink]="['/property', buildingId(), 'units', row.id, 'leases']" aria-label="Manage lease">
-                    <mat-icon>assignment</mat-icon>
-                  </a>
-                  <button mat-icon-button (click)="openUnitDetails(row)" [attr.aria-label]="i18n.translate('building.units.preview')">
-                    <mat-icon>visibility</mat-icon>
-                  </button>
-                  <button mat-icon-button color="warn" (click)="deleteUnit(row)" [disabled]="!canManageUnits()">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </td>
-              </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
@@ -434,10 +424,6 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
   readonly pageIndex = signal<number>(0);
   readonly pageSize = signal<number>(10);
   readonly totalElements = signal<number>(0);
-  readonly owners = signal<UnitAssignee[]>([]);
-  readonly tenants = signal<UnitAssignee[]>([]);
-  readonly ownersLoading = signal<boolean>(false);
-  readonly assigneeLoadError = signal<string>('');
   readonly editingUnitId = signal<number | null>(null);
   readonly createFormOpen = signal<boolean>(false);
   readonly selectedUnitId = signal<number | null>(null);
@@ -446,7 +432,7 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
   readonly detailsLoading = signal<boolean>(false);
   readonly detailsError = signal<string>('');
   readonly canManageUnits = signal<boolean>(false);
-  readonly displayedColumns: string[] = ['unitNumber', 'unitType', 'status', 'owner', 'tenant', 'floorNumber', 'occupied', 'actions'];
+  readonly displayedColumns: string[] = ['unitNumber', 'unitType', 'status', 'owner', 'tenant', 'floorNumber', 'occupied'];
   readonly statuses: UnitStatus[] = ['VACANT', 'OCCUPIED', 'MAINTENANCE', 'RESERVED'];
 
   readonly unitForm = this.fb.nonNullable.group({
@@ -464,12 +450,12 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
     parkingSpot: [null as string | null],
     storageUnit: [null as string | null],
     occupied: [false],
-    ownerId: [null as number | null],
     ownerName: ['', [Validators.maxLength(120)]],
     ownerEmail: ['', [Validators.email, Validators.maxLength(150)]],
-    tenantId: [null as number | null],
+    ownerPhone: ['', [Validators.maxLength(30)]],
     tenantName: ['', [Validators.maxLength(120)]],
-    tenantEmail: ['', [Validators.email, Validators.maxLength(150)]]
+    tenantEmail: ['', [Validators.email, Validators.maxLength(150)]],
+    tenantPhone: ['', [Validators.maxLength(30)]]
   });
 
   ngOnInit(): void {
@@ -566,12 +552,12 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
       parkingSpot: unit.parkingSpot ?? null,
       storageUnit: unit.storageUnit ?? null,
       occupied: unit.occupied,
-      ownerId: unit.ownerId ?? null,
       ownerName: unit.ownerName ?? '',
       ownerEmail: unit.ownerEmail ?? '',
-      tenantId: unit.tenantId ?? null,
+      ownerPhone: unit.ownerPhone ?? '',
       tenantName: unit.tenantName ?? '',
-      tenantEmail: unit.tenantEmail ?? ''
+      tenantEmail: unit.tenantEmail ?? '',
+      tenantPhone: unit.tenantPhone ?? ''
     });
   }
 
@@ -675,71 +661,10 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
     this.propertyService.getPropertyById(this.buildingId()).subscribe({
       next: (property) => {
         this.canManageUnits.set(this.canManageUnitAssignments(property));
-        this.loadAssignableUsers();
       },
       error: () => {
         this.canManageUnits.set(false);
-        this.loadAssignableUsers();
       }
-    });
-  }
-
-  private loadAssignableUsers(): void {
-    if (!this.canManageUnits()) {
-      this.ownersLoading.set(false);
-      this.owners.set([]);
-      this.tenants.set([]);
-      this.assigneeLoadError.set(this.i18n.translate('common.accessDenied403'));
-      return;
-    }
-
-    this.ownersLoading.set(true);
-    this.assigneeLoadError.set('');
-
-    this.unitService.getAssignableUsers(this.buildingId()).subscribe({
-      next: (response) => {
-        this.owners.set(response.owners ?? []);
-        this.tenants.set(response.tenants ?? []);
-        this.ownersLoading.set(false);
-      },
-      error: () => {
-        this.owners.set([]);
-        this.tenants.set([]);
-        this.assigneeLoadError.set('Owner and tenant options could not be loaded. You can still provide details manually.');
-        this.ownersLoading.set(false);
-      }
-    });
-  }
-
-  ownerDisplayName(owner: UnitAssignee): string {
-    if (owner.name && owner.name.trim().length > 0) {
-      return `${owner.name} (${owner.email})`;
-    }
-    const fullName = `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim();
-    return fullName.length > 0 ? `${fullName} (${owner.email})` : owner.email;
-  }
-
-  onOwnerSelected(ownerId: number | null): void {
-    const selectedOwner = this.owners().find((owner) => owner.id === ownerId);
-    if (!selectedOwner) {
-      return;
-    }
-
-    this.unitForm.patchValue({
-      ownerName: selectedOwner.name?.trim() || `${selectedOwner.firstName ?? ''} ${selectedOwner.lastName ?? ''}`.trim(),
-      ownerEmail: selectedOwner.email
-    });
-  }
-
-  onTenantSelected(tenantId: number | null): void {
-    const selectedTenant = this.tenants().find((tenant) => tenant.id === tenantId);
-    if (!selectedTenant) {
-      return;
-    }
-
-    this.unitForm.patchValue({
-      tenantName: selectedTenant.name?.trim() || `${selectedTenant.firstName ?? ''} ${selectedTenant.lastName ?? ''}`.trim(),
-      tenantEmail: selectedTenant.email
     });
   }
 
@@ -863,12 +788,12 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
       parkingSpot: raw.parkingSpot,
       storageUnit: raw.storageUnit,
       occupied: raw.occupied,
-      ownerId: raw.ownerId,
       ownerName: raw.ownerName?.trim() || null,
       ownerEmail: raw.ownerEmail?.trim() || null,
-      tenantId: raw.tenantId,
+      ownerPhone: raw.ownerPhone?.trim() || null,
       tenantName: raw.tenantName?.trim() || null,
-      tenantEmail: raw.tenantEmail?.trim() || null
+      tenantEmail: raw.tenantEmail?.trim() || null,
+      tenantPhone: raw.tenantPhone?.trim() || null
     };
   }
 
@@ -890,12 +815,12 @@ export class BuildingUnitsComponent implements OnInit, OnDestroy {
       parkingSpot: null,
       storageUnit: null,
       occupied: false,
-      ownerId: null,
       ownerName: '',
       ownerEmail: '',
-      tenantId: null,
+      ownerPhone: '',
       tenantName: '',
-      tenantEmail: ''
+      tenantEmail: '',
+      tenantPhone: ''
     });
     this.unitForm.markAsPristine();
     this.unitForm.markAsUntouched();

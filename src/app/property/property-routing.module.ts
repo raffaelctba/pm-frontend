@@ -8,6 +8,10 @@ const routes: Routes = [
     component: PropertyDashboardComponent
   },
   {
+    path: 'edit',
+    loadComponent: () => import('../pages/properties/property-form/property-form.component').then(m => m.PropertyFormComponent)
+  },
+  {
     path: 'workspace',
     loadComponent: () => import('../pages/properties/property-management/property-management.component').then(m => m.PropertyManagementComponent)
   },
@@ -28,8 +32,58 @@ const routes: Routes = [
     loadComponent: () => import('../pages/buildings/leases/building-leases.component').then(m => m.BuildingLeasesComponent)
   },
   {
+    path: 'units/:unitId/tenants',
+    loadComponent: () => import('../navigation/pages/section-placeholder/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+    data: { menu: 'tenants', title: 'Tenants' }
+  },
+  {
+    path: 'units/:unitId/payments',
+    loadComponent: () => import('../navigation/pages/section-placeholder/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+    data: { menu: 'payments', title: 'Payments' }
+  },
+  {
+    path: 'units/:unitId/payment-history',
+    loadComponent: () => import('../navigation/pages/section-placeholder/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+    data: { menu: 'payment-history', title: 'Payment History' }
+  },
+  {
+    path: 'units/:unitId/maintenance',
+    loadComponent: () => import('../pages/buildings/maintenance/building-maintenance.component').then(m => m.BuildingMaintenanceComponent),
+    data: { menu: 'unit-maintenance', title: 'Unit Maintenance' }
+  },
+  {
+    path: 'units/:unitId/private-maintenance',
+    loadComponent: () => import('../pages/buildings/private-maintenance/private-unit-maintenance.component').then(m => m.PrivateUnitMaintenanceComponent),
+    data: { menu: 'unit-private-maintenance', title: 'Private Maintenance' }
+  },
+  {
+    path: 'units/:unitId/private-maintenance-history',
+    loadComponent: () => import('../pages/buildings/private-maintenance/private-unit-maintenance.component').then(m => m.PrivateUnitMaintenanceComponent),
+    data: { menu: 'unit-private-maintenance-history', title: 'Private Maintenance History', historyOnly: true }
+  },
+  {
+    path: 'units/:unitId/documents',
+    loadComponent: () => import('../navigation/pages/section-placeholder/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+    data: { menu: 'unit-documents', title: 'Unit Documents' }
+  },
+  {
+    path: 'units/:unitId/settings',
+    loadComponent: () => import('../navigation/pages/section-placeholder/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+    data: { menu: 'unit-settings', title: 'Unit Settings' }
+  },
+  {
     path: 'work-orders',
     loadComponent: () => import('../pages/buildings/work-orders/building-work-orders.component').then(m => m.BuildingWorkOrdersComponent)
+  },
+  {
+    path: 'maintenance',
+    loadComponent: () => import('../pages/buildings/maintenance/building-maintenance.component').then(m => m.BuildingMaintenanceComponent),
+    data: { menu: 'maintenance' }
+  },
+  {
+    path: 'maintenance-history',
+    loadComponent: () => import('../pages/buildings/maintenance/building-maintenance.component').then(m => m.BuildingMaintenanceComponent),
+    data: { menu: 'maintenance-history', historyOnly: true }
   },
   {
     path: 'compliance',
@@ -46,6 +100,11 @@ const routes: Routes = [
   {
     path: 'finances',
     loadComponent: () => import('../pages/buildings/finances/building-finances.component').then(m => m.BuildingFinancesComponent)
+  },
+  {
+    path: 'reservations',
+    loadComponent: () => import('../navigation/pages/section-placeholder/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+    data: { menu: 'reservations', title: 'Reservations' }
   },
   {
     path: 'billing',
@@ -74,6 +133,16 @@ const routes: Routes = [
   {
     path: 'amenities',
     loadComponent: () => import('../pages/buildings/amenities/building-amenities.component').then(m => m.BuildingAmenitiesComponent)
+  },
+  {
+    path: 'users',
+    loadComponent: () => import('../pages/buildings/users/building-users.component').then(m => m.BuildingUsersComponent),
+    data: { menu: 'users' }
+  },
+  {
+    path: 'units/:unitId/users',
+    loadComponent: () => import('../pages/buildings/users/unit-users.component').then(m => m.UnitUsersComponent),
+    data: { menu: 'unit-users', title: 'Unit Users' }
   }
 ];
 
@@ -82,5 +151,4 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class PropertyRoutingModule {}
-
 

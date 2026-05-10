@@ -130,7 +130,11 @@ export class BuildingAmenitiesComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const rawId = this.route.snapshot.paramMap.get('id') ?? '0';
+    const rawId = this.route.snapshot.paramMap.get('id')
+      ?? this.route.snapshot.paramMap.get('buildingId')
+      ?? this.route.parent?.snapshot.paramMap.get('buildingId')
+      ?? this.route.parent?.snapshot.paramMap.get('id')
+      ?? '0';
     this.propertyId.set(Number(rawId));
     this.loadAmenities();
     this.loadAnalytics();

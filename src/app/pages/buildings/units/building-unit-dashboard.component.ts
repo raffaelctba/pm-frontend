@@ -8,6 +8,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BuildingUnitDetails, InvoiceStatus, UnitStatus, UnitTenantContact } from '../../../models/building/building-unit.model';
 import { BuildingUnitService } from '../../../services/building/building-unit.service';
 import { I18nService } from '../../../services/i18n.service';
+import { DashboardContextService } from '../../../services/dashboard-context.service';
+import { canManageBuildingOperations } from '../../../shared/utils/property-permissions.util';
 
 @Component({
   selector: 'app-unit-dashboard',
@@ -22,8 +24,6 @@ import { I18nService } from '../../../services/i18n.service';
           <p class="text-sm text-slate-600">{{ i18n.translate('unit.dashboard.subtitle') }}</p>
         </div>
         <div class="flex gap-2">
-          <a [routerLink]="['/property', buildingId(), 'units']" mat-stroked-button>{{ i18n.translate('unit.dashboard.backToUnits') }}</a>
-          <a [routerLink]="['/property', buildingId(), 'units', unitId(), 'leases']" mat-stroked-button>Manage lease</a>
           <a
             mat-stroked-button
             [routerLink]="['/property', buildingId(), 'finances']"
@@ -183,6 +183,7 @@ export class UnitDashboardComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly unitService = inject(BuildingUnitService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dashboardContext = inject(DashboardContextService);
   readonly i18n = inject(I18nService);
 
   readonly buildingId = signal<number>(0);
@@ -190,6 +191,20 @@ export class UnitDashboardComponent implements OnInit {
   readonly loading = signal<boolean>(true);
   readonly errorMessage = signal<string>('');
   readonly unitDetails = signal<BuildingUnitDetails | null>(null);
+
+  /** True when the "Manage lease" action should be available to this user. */
+  readonly canManageLease = computed(() => {
+    const property = this.dashboardContext.property();
+    // If we have no property context yet, show the button (fail-open until data loads).
+    if (!property) return true;
+
+    // Owners, admins and building managers can always manage leases regardless of module state.
+    const role = property.currentUserRole;
+    if (canManageBuildingOperations(role)) return true;
+
+    // For everyone else the lease module must be enabled on the property.
+    return property.capabilities?.leaseManagement === true;
+  });
 
   readonly collectionHealth = computed(() => {
     const details = this.unitDetails();
@@ -201,7 +216,11 @@ export class UnitDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
-      const rawBuildingId = params.get('id') ?? this.route.parent?.snapshot.paramMap.get('id') ?? '0';
+      const rawBuildingId = params.get('id')
+        ?? params.get('buildingId')
+        ?? this.route.parent?.snapshot.paramMap.get('buildingId')
+        ?? this.route.parent?.snapshot.paramMap.get('id')
+        ?? '0';
       this.buildingId.set(Number(rawBuildingId));
       this.unitId.set(Number(params.get('unitId') || 0));
       this.loadDetails();

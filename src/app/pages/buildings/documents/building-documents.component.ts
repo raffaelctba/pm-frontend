@@ -215,6 +215,8 @@ export class BuildingDocumentsComponent implements OnInit {
 
   ngOnInit(): void {
     const rawId = this.route.snapshot.paramMap.get('id')
+      ?? this.route.snapshot.paramMap.get('buildingId')
+      ?? this.route.parent?.snapshot.paramMap.get('buildingId')
       ?? this.route.parent?.snapshot.paramMap.get('id')
       ?? '0';
     this.buildingId.set(Number(rawId));

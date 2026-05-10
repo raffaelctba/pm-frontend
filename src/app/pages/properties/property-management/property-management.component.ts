@@ -52,7 +52,7 @@ interface LeaseDraft {
             </div>
 
             <div class="flex flex-wrap gap-2">
-              <a [routerLink]="['/properties', currentProperty.id, 'edit']" class="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20">
+              <a [routerLink]="['/property', currentProperty.id, 'edit']" class="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20">
                 {{ i18n.translate('property.workspace.editProperty') }}
               </a>
               <a routerLink="/properties" class="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10">

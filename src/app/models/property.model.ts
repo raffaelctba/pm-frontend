@@ -36,6 +36,10 @@ export interface Property {
   lateFeePercentage?: number;
   interestRateMonthly?: number;
   billing?: PropertyBilling;
+  leaseManagementEnabled?: boolean | null;
+  condoManagementEnabled?: boolean | null;
+  amenitiesEnabled?: boolean | null;
+  capabilities?: PropertyCapabilities;
 }
 
 export interface PropertyDTO {
@@ -57,6 +61,20 @@ export interface PropertyDTO {
   lateFeePercentage?: number;
   interestRateMonthly?: number;
   billing?: PropertyBilling;
+  leaseManagementEnabled?: boolean | null;
+  condoManagementEnabled?: boolean | null;
+  amenitiesEnabled?: boolean | null;
+}
+
+export interface PropertyCapabilities {
+  leaseManagement: boolean;
+  rentalPayments: boolean;
+  condoManagement: boolean;
+  buildingUnits: boolean;
+  amenities: boolean;
+  leaseManagementOverride?: boolean | null;
+  condoManagementOverride?: boolean | null;
+  amenitiesOverride?: boolean | null;
 }
 
 export interface PropertyBilling {

@@ -176,6 +176,46 @@ import { PropertyDTO, PropertyType, PropertyUsageType } from '../../../models/pr
           </div>
         </div>
 
+        <!-- Modules / Capabilities -->
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-1">{{ i18n.translate('property.workspace.modules') }}</h2>
+          <p class="text-sm text-gray-600 mb-4">{{ i18n.translate('property.workspace.modules.subtitle') }}</p>
+
+          <div class="space-y-4">
+            <ng-container *ngFor="let m of moduleControls">
+              <div class="rounded-lg border border-gray-200 p-4">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="font-medium text-gray-900">{{ i18n.translate(m.labelKey) }}</p>
+                    <p class="text-sm text-gray-600">{{ i18n.translate(m.helpKey) }}</p>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="text-gray-500">{{ i18n.translate('property.workspace.modules.effective') }}:</span>
+                    <span class="font-medium" [class.text-green-700]="isModuleEffective(m.controlName)" [class.text-gray-500]="!isModuleEffective(m.controlName)">
+                      {{ i18n.translate(isModuleEffective(m.controlName) ? 'property.workspace.modules.on' : 'property.workspace.modules.off') }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-4">
+                  <label class="inline-flex items-center gap-2 text-sm">
+                    <input type="radio" [formControlName]="m.controlName" [value]="null" class="h-4 w-4 text-primary-600">
+                    <span>{{ i18n.translate('property.workspace.modules.auto') }}</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 text-sm">
+                    <input type="radio" [formControlName]="m.controlName" [value]="true" class="h-4 w-4 text-primary-600">
+                    <span>{{ i18n.translate('property.workspace.modules.on') }}</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 text-sm">
+                    <input type="radio" [formControlName]="m.controlName" [value]="false" class="h-4 w-4 text-primary-600">
+                    <span>{{ i18n.translate('property.workspace.modules.off') }}</span>
+                  </label>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
         <!-- Building Details -->
         <div *ngIf="isMultiUnitSelected()">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ i18n.translate('property.workspace.buildingManagement') }}</h2>
@@ -294,8 +334,47 @@ export class PropertyFormComponent implements OnInit {
       gracePeriodDays: [null],
       autoGenerateInvoices: [true],
       autoSendReminders: [true],
-      reminderDaysBeforeDue: [3]
+      reminderDaysBeforeDue: [3],
+      leaseManagementEnabled: [null],
+      condoManagementEnabled: [null],
+      amenitiesEnabled: [null]
     });
+  }
+
+  readonly moduleControls = [
+    {
+      controlName: 'leaseManagementEnabled',
+      labelKey: 'property.workspace.modules.lease',
+      helpKey: 'property.workspace.modules.leaseHelp'
+    },
+    {
+      controlName: 'condoManagementEnabled',
+      labelKey: 'property.workspace.modules.condo',
+      helpKey: 'property.workspace.modules.condoHelp'
+    },
+    {
+      controlName: 'amenitiesEnabled',
+      labelKey: 'property.workspace.modules.amenities',
+      helpKey: 'property.workspace.modules.amenitiesHelp'
+    }
+  ] as const;
+
+  isModuleEffective(controlName: string): boolean {
+    const override = this.propertyForm.get(controlName)?.value;
+    if (override === true) return true;
+    if (override === false) return false;
+    return this.defaultForModule(controlName);
+  }
+
+  private defaultForModule(controlName: string): boolean {
+    const isMultiUnit = this.isMultiUnitSelected();
+    const isRental = this.propertyForm.get('usageType')?.value === PropertyUsageType.RENTAL;
+    switch (controlName) {
+      case 'leaseManagementEnabled': return isMultiUnit || isRental;
+      case 'condoManagementEnabled': return isMultiUnit;
+      case 'amenitiesEnabled': return isMultiUnit;
+      default: return false;
+    }
   }
 
   onPropertyTypeChange(): void {
@@ -320,16 +399,31 @@ export class PropertyFormComponent implements OnInit {
   ngOnInit(): void {
     this.loadCountries();
 
-    this.route.params.subscribe(params => {
-      if (params['id']) {
-        this.isEditMode = true;
-        this.propertyId = +params['id'];
-        this.loadProperty();
-      } else {
-        // Load default country config (Brazil)
+    // Support direct (:id, :buildingId) and parent route params from /property/:id/edit or /building/:buildingId/settings
+    const directId = this.route.snapshot.params['id'] ?? this.route.snapshot.params['buildingId'];
+    const parentId = this.route.snapshot.parent?.params['id'] ?? this.route.snapshot.parent?.params['buildingId'];
+    const resolvedId = directId ?? parentId;
+
+    if (resolvedId) {
+      this.isEditMode = true;
+      this.propertyId = +resolvedId;
+      this.loadProperty();
+    } else {
+      // Also subscribe for dynamic param changes
+      this.route.params.subscribe(params => {
+        if (params['id']) {
+          this.isEditMode = true;
+          this.propertyId = +params['id'];
+          this.loadProperty();
+        } else {
+          this.loadCountryConfig('BR');
+        }
+      });
+
+      if (!resolvedId) {
         this.loadCountryConfig('BR');
       }
-    });
+    }
   }
 
   loadCountries(): void {
@@ -474,7 +568,10 @@ export class PropertyFormComponent implements OnInit {
             gracePeriodDays: billing?.gracePeriodDays ?? null,
             autoGenerateInvoices: billing?.autoGenerateInvoices ?? true,
             autoSendReminders: billing?.autoSendReminders ?? true,
-            reminderDaysBeforeDue: billing?.reminderDaysBeforeDue ?? 3
+            reminderDaysBeforeDue: billing?.reminderDaysBeforeDue ?? 3,
+            leaseManagementEnabled: property.leaseManagementEnabled ?? null,
+            condoManagementEnabled: property.condoManagementEnabled ?? null,
+            amenitiesEnabled: property.amenitiesEnabled ?? null
           });
         },
         error: (error) => {
@@ -496,8 +593,13 @@ export class PropertyFormComponent implements OnInit {
         : this.propertyService.createProperty(propertyData);
 
       request.subscribe({
-        next: () => {
-          this.router.navigate(['/properties']);
+        next: (saved) => {
+          const savedId = (saved as any)?.id ?? this.propertyId;
+          if (savedId) {
+            this.router.navigate(['/property', savedId]);
+          } else {
+            this.router.navigate(['/portfolio']);
+          }
         },
         error: (error) => {
           console.error('Error saving property:', error);
@@ -545,8 +647,17 @@ export class PropertyFormComponent implements OnInit {
       bathrooms: this.toNumberOrUndefined(formValue.bathrooms),
       parkingSpaces: this.toNumberOrUndefined(formValue.parkingSpaces),
       totalUnits: this.toNumberOrUndefined(formValue.totalUnits),
+      leaseManagementEnabled: this.toTriStateOrNull(formValue.leaseManagementEnabled),
+      condoManagementEnabled: this.toTriStateOrNull(formValue.condoManagementEnabled),
+      amenitiesEnabled: this.toTriStateOrNull(formValue.amenitiesEnabled),
       billing
     };
+  }
+
+  private toTriStateOrNull(value: unknown): boolean | null {
+    if (value === true || value === 'true') return true;
+    if (value === false || value === 'false') return false;
+    return null;
   }
 
   private hasBillingConfig(formValue: any): boolean {
@@ -616,6 +727,10 @@ export class PropertyFormComponent implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/properties']);
+    if (this.isEditMode && this.propertyId) {
+      this.router.navigate(['/property', this.propertyId]);
+    } else {
+      this.router.navigate(['/portfolio']);
+    }
   }
 }

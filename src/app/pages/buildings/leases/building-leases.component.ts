@@ -199,7 +199,11 @@ export class BuildingLeasesComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const rawBuildingId = this.route.snapshot.paramMap.get('id') || '0';
+    const rawBuildingId = this.route.snapshot.paramMap.get('id')
+      || this.route.snapshot.paramMap.get('buildingId')
+      || this.route.parent?.snapshot.paramMap.get('buildingId')
+      || this.route.parent?.snapshot.paramMap.get('id')
+      || '0';
     const rawUnitId = this.route.snapshot.paramMap.get('unitId');
     this.buildingId.set(Number(rawBuildingId));
     if (rawUnitId) {
@@ -232,7 +236,7 @@ export class BuildingLeasesComponent implements OnInit {
 
   private loadAssignableUsers(): void {
     this.buildingUnitService.getAssignableUsers(this.buildingId()).subscribe({
-      next: (options) => {
+      next: (options: { owners: UnitAssignee[]; tenants: UnitAssignee[] }) => {
         this.landlords.set(options.owners || []);
         this.tenants.set(options.tenants || []);
       },

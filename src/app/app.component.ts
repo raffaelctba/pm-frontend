@@ -10,19 +10,13 @@ import { PropertyService } from './services/property.service';
 import { UserPreferencesService } from './services/user-preferences.service';
 import { SessionToastComponent } from './components/session-toast/session-toast.component';
 import { ProfileMenuComponent } from './components/profile-menu/profile-menu.component';
-import { canManageBuildingOperations, isMultiUnitProperty } from './shared/utils/property-permissions.util';
-
-interface PropertySubmenuEntry {
-  labelKey: string;
-  link: any[];
-  queryParams?: Record<string, string | number>;
-  exact?: boolean;
-}
+import { BreadcrumbComponent } from './navigation/components/breadcrumb/breadcrumb.component';
+import { TopMenuComponent } from './navigation/components/top-menu/top-menu.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, SessionToastComponent, ProfileMenuComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, SessionToastComponent, ProfileMenuComponent, BreadcrumbComponent, TopMenuComponent],
   template: `
     <div class="min-h-screen bg-gray-50 transition-colors dark:bg-slate-950">
       <nav class="bg-white shadow-lg transition-colors dark:bg-slate-900 dark:shadow-black/30">
@@ -115,29 +109,8 @@ interface PropertySubmenuEntry {
         </div>
       </nav>
 
-      <div
-        *ngIf="authService.isLoggedIn() && currentPropertyId() as propertyId"
-        class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 py-2 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/95"
-      >
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="mr-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              {{ i18n.translate(dashboardContext.workspaceManagementLabelKey()) }}
-            </span>
-
-            <a
-              *ngFor="let entry of propertySubmenuEntries(propertyId); trackBy: trackBySubmenuLabel"
-              [routerLink]="entry.link"
-              [queryParams]="entry.queryParams ?? null"
-              routerLinkActive="bg-primary-100 text-primary-700 dark:bg-primary-500/20 dark:text-primary-300"
-              [routerLinkActiveOptions]="{ exact: entry.exact ?? false }"
-              class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              {{ i18n.translate(entry.labelKey) }}
-            </a>
-          </div>
-        </div>
-      </div>
+      <app-breadcrumb />
+      <app-top-menu />
 
       <app-session-toast />
 
@@ -149,23 +122,6 @@ interface PropertySubmenuEntry {
 })
 export class AppComponent {
   readonly notificationPanelOpen = signal(false);
-  readonly currentPropertyId = signal<number | null>(null);
-  private readonly buildingSubmenuTemplate: Omit<PropertySubmenuEntry, 'link'>[] = [
-    { labelKey: 'property.workspace.overview', exact: true },
-    { labelKey: 'property.workspace.units' },
-    { labelKey: 'property.workspace.finances' },
-    { labelKey: 'property.workspace.incidents' },
-    { labelKey: 'property.workspace.workOrders' },
-    { labelKey: 'property.workspace.compliance' },
-    { labelKey: 'property.workspace.documents' }
-  ];
-  private readonly privateSubmenuTemplate: Omit<PropertySubmenuEntry, 'link'>[] = [
-    { labelKey: 'property.workspace.overview', exact: true },
-    { labelKey: 'property.workspace.tenantContracts' },
-    { labelKey: 'property.workspace.editProperty' },
-    { labelKey: 'nav.invoices' },
-    { labelKey: 'nav.chat' }
-  ];
   private propertyMetadataLoadId: number | null = null;
 
   constructor(
@@ -187,10 +143,9 @@ export class AppComponent {
   }
 
   private syncPropertyRouteContext(): void {
-    const match = this.router.url.match(/^\/property\/(\d+)(?:\/|$)/);
+    const match = this.router.url.match(/^\/(?:property|building)\/(\d+)(?:\/|$)/);
     const propertyId = match ? Number(match[1]) : NaN;
     const validPropertyId = Number.isFinite(propertyId) && propertyId > 0 ? propertyId : null;
-    this.currentPropertyId.set(validPropertyId);
 
     if (validPropertyId !== null) {
       this.dashboardContext.setPropertyContext(validPropertyId);
@@ -220,44 +175,6 @@ export class AppComponent {
         }
       }
     });
-  }
-
-  propertySubmenuEntries(propertyId: number): PropertySubmenuEntry[] {
-    const propertyType = this.dashboardContext.property()?.propertyType;
-    const currentUserRole = this.dashboardContext.property()?.currentUserRole;
-    const multiUnit = isMultiUnitProperty(propertyType);
-
-    if (multiUnit) {
-      if (!canManageBuildingOperations(currentUserRole)) {
-        return [
-          { ...this.buildingSubmenuTemplate[0], link: ['/property', propertyId] },
-          { ...this.buildingSubmenuTemplate[3], link: ['/property', propertyId, 'incidents'] },
-          { ...this.buildingSubmenuTemplate[6], link: ['/property', propertyId, 'documents'] }
-        ];
-      }
-
-      return [
-        { ...this.buildingSubmenuTemplate[0], link: ['/property', propertyId] },
-        { ...this.buildingSubmenuTemplate[1], link: ['/property', propertyId, 'units'] },
-        { ...this.buildingSubmenuTemplate[2], link: ['/property', propertyId, 'finances'] },
-        { ...this.buildingSubmenuTemplate[3], link: ['/property', propertyId, 'incidents'] },
-        { ...this.buildingSubmenuTemplate[4], link: ['/property', propertyId, 'work-orders'] },
-        { ...this.buildingSubmenuTemplate[5], link: ['/property', propertyId, 'compliance'] },
-        { ...this.buildingSubmenuTemplate[6], link: ['/property', propertyId, 'documents'] }
-      ];
-    }
-
-    if (propertyType) {
-      return [
-        { ...this.privateSubmenuTemplate[0], link: ['/property', propertyId] },
-        { ...this.privateSubmenuTemplate[1], link: ['/property', propertyId, 'workspace'] },
-        { ...this.privateSubmenuTemplate[2], link: ['/properties', propertyId, 'edit'] },
-        { ...this.privateSubmenuTemplate[3], link: ['/invoices'], queryParams: { property: propertyId }, exact: true },
-        { ...this.privateSubmenuTemplate[4], link: ['/chat'], queryParams: { property: propertyId }, exact: true }
-      ];
-    }
-
-    return [{ labelKey: 'property.workspace.overview', link: ['/property', propertyId], exact: true }];
   }
 
   @HostListener('document:click')
@@ -294,10 +211,6 @@ export class AppComponent {
     return item.id;
   }
 
-  trackBySubmenuLabel(_: number, entry: PropertySubmenuEntry): string {
-    return entry.labelKey;
-  }
-
   notificationBorderClass(severity: string): string {
     switch (severity) {
       case 'error':
@@ -311,3 +224,4 @@ export class AppComponent {
     }
   }
 }
+

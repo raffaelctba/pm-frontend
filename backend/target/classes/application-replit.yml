@@ -1,0 +1,110 @@
+spring:
+  application:
+    name: myproperty-management-replit
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
+  datasource:
+    url: jdbc:postgresql://ep-restless-field-aff9ioif-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+    username: neondb_owner
+    password: npg_sJxv9OTo1XDa
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  kafka:
+    enabled: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8083/realms/myproperty
+          jwk-set-uri: http://localhost:8083/realms/myproperty/protocol/openid-connect/certs
+
+keycloak:
+  realm: myproperty
+  auth-server-url: http://localhost:8083
+  admin-client-id: myproperty-springboot-backend
+  admin-client-secret: HpV2u6cTtxgEZ8wyECSIyFeKOJEum0m0
+  resource: property-backend
+  credentials:
+    secret: dev-client-secret
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  error:
+    include-message: always
+    include-binding-errors: always
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.myproperty: DEBUG
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+app:
+  cors:
+    allowed-origins: "http://localhost:5000,http://localhost:4200,https://be716d08-e5aa-497e-9317-2c5720cd782a-00-1xhlus31838qi.kirk.replit.dev,https://be716d08-e5aa-497e-9317-2c5720cd782a-00-1xhlus31838qi.kirk.replit.dev:443"
+  chat:
+    kafka:
+      publish-enabled: false
+      topic: chat-messages
+  db:
+    cleanup:
+      enabled: false
+    seed:
+      enabled: true
+      reset-first: false
+  kafka:
+    topics:
+      building-events: building-events
+      maintenance-events: maintenance-events
+      compliance-events: compliance-events
+      communication-events: communication-events
+      financial-events: financial-events
+      incident-events: incident-events
+      iot-events: iot-events
+  building:
+    compliance:
+      default-reminder-days: 7
+      reminder-cron: "0 */30 * * * *"
+    sse-heartbeat-ms: 30000

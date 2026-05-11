@@ -1,0 +1,12 @@
+ALTER TABLE properties
+    ADD COLUMN usage_type VARCHAR(40) NOT NULL DEFAULT 'RENTAL';
+
+ALTER TABLE properties
+    ADD COLUMN management_mode VARCHAR(40) NOT NULL DEFAULT 'SINGLE_UNIT';
+
+UPDATE properties
+SET management_mode = CASE
+    WHEN COALESCE(is_building, FALSE) THEN 'BUILDING'
+    ELSE 'SINGLE_UNIT'
+END;
+

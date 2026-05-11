@@ -1,0 +1,125 @@
+spring:
+  application:
+    name: myproperty-management-test
+
+  datasource:
+    url: jdbc:postgresql://ep-restless-field-aff9ioif-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+    username: neondb_owner
+    password: npg_sJxv9OTo1XDa
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: false
+
+  flyway:
+    enabled: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: myproperty-test-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topics:
+      property-events: property-events-test
+      invoice-events: invoice-events-test
+      notification-events: notification-events-test
+      audit-events: audit-events-test
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://test-keycloak:8080/realms/myproperty
+          jwk-set-uri: http://test-keycloak:8080/realms/myproperty/protocol/openid-connect/certs
+
+keycloak:
+  realm: myproperty
+  auth-server-url: http://test-keycloak:8080
+  admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-cli}
+  admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}
+  resource: property-backend
+  credentials:
+    secret: test-client-secret
+  use-resource-role-mappings: true
+  bearer-only: true
+
+server:
+  port: 8081
+  servlet:
+    context-path: /api
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: false
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.myproperty: INFO
+    org.springframework.security: INFO
+    org.springframework.kafka: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/myproperty-test.log
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+app:
+  chat:
+    kafka:
+      publish-enabled: false
+      topic: chat-messages-test
+  kafka:
+    topics:
+      building-events: building-events-test
+      maintenance-events: maintenance-events-test
+      compliance-events: compliance-events-test
+      communication-events: communication-events-test
+      financial-events: financial-events-test
+      incident-events: incident-events-test
+      iot-events: iot-events-test
+  building:
+    compliance:
+      default-reminder-days: 7
+      reminder-cron: "0 */30 * * * *"
+    sse-heartbeat-ms: 30000
+

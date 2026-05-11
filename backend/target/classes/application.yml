@@ -1,0 +1,213 @@
+# Common Configuration for All Environments
+# Profile-specific configurations: application-{profile}.yml
+
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  application:
+    name: myproperty-management
+
+  # Common datasource configuration (overridden by profiles)
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-test-query: SELECT 1
+      leak-detection-threshold: 60000
+
+  # Common JPA configuration
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+
+  # Common Flyway configuration
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+
+  # Common Kafka configuration
+  kafka:
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  # Security configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8083/realms/myproperty}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8083/realms/myproperty/protocol/openid-connect/certs}
+
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:false}
+
+# Common Keycloak configuration
+keycloak:
+  realm: ${KEYCLOAK_REALM:myproperty}
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8083}
+  admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-cli}
+  admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}
+  admin-username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+  admin-password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
+  resource: ${KEYCLOAK_RESOURCE:property-backend}
+  use-resource-role-mappings: true
+  bearer-only: true
+
+# Common Server configuration
+server:
+  port: ${SERVER_PORT:8081}
+  servlet:
+    context-path: /api
+  shutdown: graceful
+
+# Common Springdoc configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+# Common Management endpoints
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+  endpoint:
+    health:
+      enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+# Common Logging configuration
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+app:
+  chat:
+    kafka:
+      publish-enabled: false
+      topic: chat-messages
+  property:
+    images:
+      upload-dir: ${PROPERTY_IMAGES_UPLOAD_DIR:uploads/property-images}
+      max-file-size: ${PROPERTY_IMAGES_MAX_FILE_SIZE:10485760}
+  payment:
+    stripe:
+      api-key: ${PAYMENT_STRIPE_API_KEY:}
+      checkout-base-url: ${PAYMENT_STRIPE_CHECKOUT_BASE_URL:https://checkout.stripe.com/pay}
+      webhook-base-url: ${PAYMENT_STRIPE_WEBHOOK_BASE_URL:https://api.stripe.com/v1}
+    mercadopago:
+      checkout-base-url: ${PAYMENT_MERCADOPAGO_CHECKOUT_BASE_URL:https://www.mercadopago.com/checkout/v1/redirect}
+    adyen:
+      checkout-base-url: ${PAYMENT_ADYEN_CHECKOUT_BASE_URL:https://checkoutshopper-live.adyen.com/checkoutshopper/}
+    routing:
+      default-supported-methods:
+        - BANK_TRANSFER
+        - CREDIT_CARD
+        - DEBIT_CARD
+      default-preferred-providers:
+        - MANUAL_FALLBACK
+      countries:
+        BR:
+          supported-methods:
+            - PIX
+            - BANK_TRANSFER
+            - CREDIT_CARD
+            - DEBIT_CARD
+          preferred-providers-by-method:
+            PIX:
+              - BRAZIL_PIX
+              - MANUAL_FALLBACK
+            CREDIT_CARD:
+              - MERCADOPAGO
+              - STRIPE_CARD
+              - MANUAL_FALLBACK
+            DEBIT_CARD:
+              - MERCADOPAGO
+              - STRIPE_CARD
+              - MANUAL_FALLBACK
+        US:
+          supported-methods:
+            - BANK_TRANSFER
+            - CREDIT_CARD
+            - DEBIT_CARD
+            - CHECK
+          preferred-providers-by-method:
+            CREDIT_CARD:
+              - ADYEN_CARD
+              - STRIPE_CARD
+              - MANUAL_FALLBACK
+            DEBIT_CARD:
+              - ADYEN_CARD
+              - STRIPE_CARD
+              - MANUAL_FALLBACK
+        PT:
+          supported-methods:
+            - BANK_TRANSFER
+            - CREDIT_CARD
+            - DEBIT_CARD
+          preferred-providers-by-method:
+            CREDIT_CARD:
+              - ADYEN_CARD
+              - STRIPE_CARD
+              - MANUAL_FALLBACK
+            DEBIT_CARD:
+              - ADYEN_CARD
+              - STRIPE_CARD
+              - MANUAL_FALLBACK
+    webhook:
+      stripe:
+        secret: ${PAYMENT_WEBHOOK_STRIPE_SECRET:stripe-dev-secret}
+      pix:
+        token: ${PAYMENT_WEBHOOK_PIX_TOKEN:pix-dev-token}
+      mercadopago:
+        token: ${PAYMENT_WEBHOOK_MERCADOPAGO_TOKEN:mercadopago-dev-token}
+      adyen:
+        token: ${PAYMENT_WEBHOOK_ADYEN_TOKEN:adyen-dev-token}
+  notification:
+    email:
+      from: ${NOTIFICATION_EMAIL_FROM:no-reply@myproperty.local}
+  invitation:
+    accept-url: ${INVITATION_ACCEPT_URL:http://localhost:4200/signup?invitationToken=%s}
+  kafka:
+    topics:
+      building-events: building-events
+      maintenance-events: maintenance-events
+      compliance-events: compliance-events
+      communication-events: communication-events
+      financial-events: financial-events
+      incident-events: incident-events
+      iot-events: iot-events
+  building:
+    compliance:
+      default-reminder-days: 7
+      reminder-cron: "0 */30 * * * *"
+    sse-heartbeat-ms: 30000
+

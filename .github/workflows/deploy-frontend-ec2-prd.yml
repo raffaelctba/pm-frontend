@@ -1,0 +1,61 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'angular.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tailwind.config.js'
+      - 'tsconfig*.json'
+      - 'postcss.config.*'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build -- --configuration production
+
+      - name: Deploy to EC2
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "$SSH_KEY" > /tmp/ec2_key.pem
+          chmod 600 /tmp/ec2_key.pem
+          rsync -avz --delete \
+            -e "ssh -i /tmp/ec2_key.pem -o StrictHostKeyChecking=no" \
+            dist/myproperty-frontend/browser/ \
+            $EC2_USER@$EC2_HOST:/var/www/mybuilding.ca/
+          rm -f /tmp/ec2_key.pem
+
+      - name: Verify deployment
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "$SSH_KEY" > /tmp/ec2_key.pem
+          chmod 600 /tmp/ec2_key.pem
+          ssh -i /tmp/ec2_key.pem -o StrictHostKeyChecking=no \
+            $EC2_USER@$EC2_HOST \
+            "ls -lh /var/www/mybuilding.ca/index.html && echo '✅ Frontend deployed successfully'"
+          rm -f /tmp/ec2_key.pem

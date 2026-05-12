@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import Keycloak, { KeycloakProfile } from 'keycloak-js';
-import { from, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { InvitationInfoResponse, SignupRequest, SignupResponse } from '../models/auth.model';
 
@@ -22,7 +22,16 @@ export class AuthService {
   }
 
   getUserProfile(): Observable<KeycloakProfile> {
-    return from(this.keycloak.loadUserProfile());
+    // Avoid calling keycloak.loadUserProfile() because it fetches the Keycloak account endpoint,
+    // which is cross-origin in this setup and can trigger CORS failures from localhost.
+    // Use token claims instead; they already contain the core profile fields needed by the UI.
+    const token = this.keycloak.tokenParsed ?? {};
+    return of({
+      username: token['preferred_username'] ?? token['username'] ?? '',
+      firstName: token['given_name'] ?? '',
+      lastName: token['family_name'] ?? '',
+      email: token['email'] ?? ''
+    });
   }
 
   getToken(): Promise<string> {

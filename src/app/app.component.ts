@@ -3,7 +3,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs';
 import { AuthService } from './services/auth.service';
-import { I18nService } from './services/i18n.service';
+import { TranslationService } from './services/translation.service';
 import { NotificationCenterService } from './services/notification-center.service';
 import { DashboardContextService } from './services/dashboard-context.service';
 import { PropertyService } from './services/property.service';
@@ -128,12 +128,11 @@ export class AppComponent {
     private readonly router: Router,
     public authService: AuthService,
     public notificationCenter: NotificationCenterService,
-    public i18n: I18nService,
+    public i18n: TranslationService,
     public dashboardContext: DashboardContextService,
     private readonly propertyService: PropertyService,
     private readonly userPreferences: UserPreferencesService
   ) {
-    this.i18n.init();
     // Force early preferences service initialization so dark mode class is applied globally.
     this.userPreferences.themeMode();
     this.syncPropertyRouteContext();

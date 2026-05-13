@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 import { ConfigService } from './config.service';
@@ -26,15 +25,11 @@ export class TranslationService {
   readonly language$ = this.languageSubject.asObservable();
 
   constructor(
-    private readonly translateService: TranslateService,
     private readonly configService: ConfigService,
     private readonly userProfileService: UserProfileService,
     private readonly authService: AuthService,
     private readonly i18nService: I18nService
-  ) {
-    this.translateService.addLangs(this.supportedLanguages);
-    this.translateService.setDefaultLang(this.defaultLanguage);
-  }
+  ) {}
 
   async init(): Promise<void> {
     if (this.initialized) {
@@ -62,7 +57,7 @@ export class TranslationService {
       fallback: this.defaultLanguage
     });
 
-    await this.applyLanguage(initialLanguage);
+    this.applyLanguage(initialLanguage);
     this.initialized = true;
   }
 
@@ -72,12 +67,11 @@ export class TranslationService {
 
   setLanguage(language: string): void {
     const resolved = normalizeLanguageCode(language) ?? this.defaultLanguage;
-    void this.applyLanguage(resolved);
+    this.applyLanguage(resolved);
   }
 
   translate(key: string): string {
-    const translated = this.translateService.instant(key);
-    return translated && translated !== key ? translated : key;
+    return this.i18nService.translate(key);
   }
 
   private async resolveProfileLanguage(): Promise<LanguageCode | null> {
@@ -106,18 +100,12 @@ export class TranslationService {
     }
   }
 
-  private async applyLanguage(language: LanguageCode): Promise<void> {
+  private applyLanguage(language: LanguageCode): void {
     this.languageSubject.next(language);
     this.i18nService.setLanguage(language);
     localStorage.setItem(this.storageKey, language);
     document.documentElement.lang = language;
-    await firstValueFrom(this.translateService.use(language));
   }
 }
 
 export type { LanguageCode } from './language-detection.util';
-
-
-
-
-

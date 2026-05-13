@@ -1,14 +1,12 @@
-import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneChangeDetection, Injector } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, provideZoneChangeDetection, Injector } from '@angular/core';
 import { provideRouter, withRouterConfig } from '@angular/router';
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {
   INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
   includeBearerTokenInterceptor,
   provideKeycloak
 } from 'keycloak-angular';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { TranslateHttpLoader, TRANSLATE_HTTP_LOADER_CONFIG } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
 import { sessionAuthInterceptor } from './interceptors/session-auth.interceptor';
 import { localeInterceptor } from './interceptors/locale.interceptor';
@@ -25,20 +23,6 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection(),
     provideRouter(routes, withRouterConfig({ paramsInheritanceStrategy: 'always' })),
     provideAnimationsAsync(),
-    // Provide configuration for the TranslateHttpLoader used by @ngx-translate/http-loader v17+.
-    // The TRANSLATE_HTTP_LOADER_CONFIG token is consumed by the TranslateHttpLoader factory.
-    {
-      provide: TRANSLATE_HTTP_LOADER_CONFIG,
-      useValue: { prefix: './assets/i18n/', suffix: '.json' }
-    },
-    importProvidersFrom(
-      TranslateModule.forRoot({
-        loader: {
-          provide: TranslateLoader,
-          useClass: TranslateHttpLoader
-        }
-      })
-    ),
     provideHttpClient(withInterceptors([includeBearerTokenInterceptor, sessionAuthInterceptor, localeInterceptor])),
     {
       provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
@@ -50,7 +34,6 @@ export const appConfig: ApplicationConfig = {
     },
     // Use Injector in the APP_INITIALIZER factory to lazily obtain the TranslationService at
     // initialization time. This avoids eager provider resolution of the TranslationService
-    // (and its internal TranslateService) which can create circular dependency errors
     // during the Angular provider construction phase (NG0200).
     {
       provide: APP_INITIALIZER,

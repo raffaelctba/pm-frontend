@@ -4,6 +4,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 import { ConfigService } from './config.service';
 import { UserProfileService } from './user-profile.service';
+import { I18nService } from './i18n.service';
 import {
   LanguageCode,
   normalizeLanguageCode,
@@ -28,7 +29,8 @@ export class TranslationService {
     private readonly translateService: TranslateService,
     private readonly configService: ConfigService,
     private readonly userProfileService: UserProfileService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly i18nService: I18nService
   ) {
     this.translateService.addLangs(this.supportedLanguages);
     this.translateService.setDefaultLang(this.defaultLanguage);
@@ -106,6 +108,7 @@ export class TranslationService {
 
   private async applyLanguage(language: LanguageCode): Promise<void> {
     this.languageSubject.next(language);
+    this.i18nService.setLanguage(language);
     localStorage.setItem(this.storageKey, language);
     document.documentElement.lang = language;
     await firstValueFrom(this.translateService.use(language));

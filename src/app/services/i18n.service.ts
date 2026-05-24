@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 export type LanguageCode = 'en' | 'pt' | 'fr' | 'es';
@@ -670,7 +670,41 @@ export class I18nService {
       'maintenance.error.create': 'Could not create maintenance request.',
       'maintenance.error.load': 'Could not load maintenance requests.',
       'maintenance.scope.BUILDING': 'Building',
-      'maintenance.scope.UNIT_PRIVATE': 'Private (Unit)'
+      'maintenance.scope.UNIT_PRIVATE': 'Private (Unit)',
+      'property.tabs.gallery.title': 'Property Gallery',
+      'property.tabs.gallery.photosCount': 'photos',
+      'property.tabs.gallery.selectFile': 'Select file...',
+      'property.tabs.gallery.uploading': 'Uploading...',
+      'property.tabs.gallery.upload': 'Upload',
+      'property.tabs.gallery.uploadAsPrimary': 'Upload + Set as Main',
+      'property.tabs.gallery.primary': 'MAIN',
+      'property.tabs.gallery.loading': 'Loading photos...',
+      'property.tabs.gallery.empty': 'No photos registered for this property.',
+      'property.tabs.gallery.setPrimary': 'Set as Main',
+      'property.tabs.gallery.delete': 'Delete',
+      'property.tabs.gallery.loadError': 'Could not load property photos.',
+      'property.tabs.gallery.uploadSuccess': 'Photo uploaded successfully.',
+      'property.tabs.gallery.uploadError': 'Could not upload the photo.',
+      'property.tabs.gallery.setPrimarySuccess': 'Main photo updated.',
+      'property.tabs.gallery.setPrimaryError': 'Could not set the main photo.',
+      'property.tabs.gallery.deleteSuccess': 'Photo removed successfully.',
+      'property.tabs.gallery.deleteError': 'Could not remove the photo.',
+      'property.workspace.modulesSwitchHint': 'Use the top menu to switch between modules. This section shows operational context only.',
+      'property.workspace.immediateFocus': 'Immediate focus',
+      'property.workspace.focusItem1': 'Update unit occupancy and assignees.',
+      'property.workspace.focusItem2': 'Review pending charges and defaults.',
+      'property.workspace.focusItem3': 'Handle open incidents and work orders.',
+      'property.workspace.governance': 'Governance',
+      'property.workspace.govItem1': 'Validate active compliance and documentation.',
+      'property.workspace.govItem2': 'Confirm billing rules before period close.',
+      'property.workspace.govItem3': 'Prioritize critical tasks for this week.',
+      'property.workspace.focusBullet1': 'Unit occupancy and assignee control',
+      'property.workspace.focusBullet2': 'Payments, invoices and overdue monitoring',
+      'property.workspace.focusBullet3': 'Maintenance, incidents and compliance',
+      'property.workspace.privateModulesSwitchHint': 'Navigate modules using the top menu. Here you track the next steps for this property.',
+      'property.workspace.privateStep1': 'Confirm tenant data and contract validity.',
+      'property.workspace.privateStep2': 'Review pending payments for the current month.',
+      'property.workspace.privateStep3': 'Register planned preventive maintenance.'
     },
     pt: {
       'nav.home': 'Inicio',
@@ -1330,7 +1364,41 @@ export class I18nService {
       'maintenance.error.create': 'Nao foi possivel criar a manutencao.',
       'maintenance.error.load': 'Nao foi possivel carregar manutencoes.',
       'maintenance.scope.BUILDING': 'Predio',
-      'maintenance.scope.UNIT_PRIVATE': 'Privada (Unidade)'
+      'maintenance.scope.UNIT_PRIVATE': 'Privada (Unidade)',
+      'property.tabs.gallery.title': 'Galeria do imovel',
+      'property.tabs.gallery.photosCount': 'fotos cadastradas',
+      'property.tabs.gallery.selectFile': 'Selecionar arquivo...',
+      'property.tabs.gallery.uploading': 'Enviando...',
+      'property.tabs.gallery.upload': 'Enviar',
+      'property.tabs.gallery.uploadAsPrimary': 'Enviar + Principal',
+      'property.tabs.gallery.primary': 'PRINCIPAL',
+      'property.tabs.gallery.loading': 'Carregando fotos...',
+      'property.tabs.gallery.empty': 'Nenhuma foto cadastrada para este imovel.',
+      'property.tabs.gallery.setPrimary': 'Definir Principal',
+      'property.tabs.gallery.delete': 'Excluir',
+      'property.tabs.gallery.loadError': 'Nao foi possivel carregar as fotos do imovel.',
+      'property.tabs.gallery.uploadSuccess': 'Foto enviada com sucesso.',
+      'property.tabs.gallery.uploadError': 'Nao foi possivel enviar a foto.',
+      'property.tabs.gallery.setPrimarySuccess': 'Foto principal atualizada.',
+      'property.tabs.gallery.setPrimaryError': 'Nao foi possivel definir a foto principal.',
+      'property.tabs.gallery.deleteSuccess': 'Foto removida com sucesso.',
+      'property.tabs.gallery.deleteError': 'Nao foi possivel remover a foto.',
+      'property.workspace.modulesSwitchHint': 'Use o menu superior para alternar entre modulos. Esta secao mostra apenas contexto operacional.',
+      'property.workspace.immediateFocus': 'Foco imediato',
+      'property.workspace.focusItem1': 'Atualizar ocupacao e responsaveis das unidades.',
+      'property.workspace.focusItem2': 'Revisar cobrancas pendentes e inadimplencia.',
+      'property.workspace.focusItem3': 'Tratar incidentes e ordens de servico abertas.',
+      'property.workspace.governance': 'Governanca',
+      'property.workspace.govItem1': 'Validar compliance e documentacao vigente.',
+      'property.workspace.govItem2': 'Confirmar regras de cobranca antes do fechamento.',
+      'property.workspace.govItem3': 'Priorizar tarefas criticas desta semana.',
+      'property.workspace.focusBullet1': 'Ocupacao e controle de responsaveis das unidades',
+      'property.workspace.focusBullet2': 'Pagamentos, faturas e monitoramento de inadimplencia',
+      'property.workspace.focusBullet3': 'Manutencao, incidentes e compliance',
+      'property.workspace.privateModulesSwitchHint': 'Navegue pelos modulos usando o menu superior. Aqui voce acompanha os proximos passos deste imovel.',
+      'property.workspace.privateStep1': 'Confirmar dados do inquilino e vigencia contratual.',
+      'property.workspace.privateStep2': 'Revisar pendencias de pagamento do mes atual.',
+      'property.workspace.privateStep3': 'Registrar manutencoes preventivas planejadas.'
     },
     fr: {
       'nav.home': 'Accueil',
@@ -1987,7 +2055,41 @@ export class I18nService {
       'maintenance.error.create': 'Impossible de creer la demande.',
       'maintenance.error.load': 'Impossible de charger les demandes.',
       'maintenance.scope.BUILDING': 'Immeuble',
-      'maintenance.scope.UNIT_PRIVATE': 'Privee (Unite)'
+      'maintenance.scope.UNIT_PRIVATE': 'Privee (Unite)',
+      'property.tabs.gallery.title': 'Galerie du bien',
+      'property.tabs.gallery.photosCount': 'photos',
+      'property.tabs.gallery.selectFile': 'Selectionner un fichier...',
+      'property.tabs.gallery.uploading': 'Envoi en cours...',
+      'property.tabs.gallery.upload': 'Televerser',
+      'property.tabs.gallery.uploadAsPrimary': 'Televerser + Principal',
+      'property.tabs.gallery.primary': 'PRINCIPAL',
+      'property.tabs.gallery.loading': 'Chargement des photos...',
+      'property.tabs.gallery.empty': 'Aucune photo enregistree pour ce bien.',
+      'property.tabs.gallery.setPrimary': 'Definir comme principal',
+      'property.tabs.gallery.delete': 'Supprimer',
+      'property.tabs.gallery.loadError': 'Impossible de charger les photos du bien.',
+      'property.tabs.gallery.uploadSuccess': 'Photo televerssee avec succes.',
+      'property.tabs.gallery.uploadError': 'Impossible de televerser la photo.',
+      'property.tabs.gallery.setPrimarySuccess': 'Photo principale mise a jour.',
+      'property.tabs.gallery.setPrimaryError': 'Impossible de definir la photo principale.',
+      'property.tabs.gallery.deleteSuccess': 'Photo supprimee avec succes.',
+      'property.tabs.gallery.deleteError': 'Impossible de supprimer la photo.',
+      'property.workspace.modulesSwitchHint': 'Utilisez le menu superieur pour changer de module. Cette section affiche uniquement le contexte operationnel.',
+      'property.workspace.immediateFocus': 'Priorites immediates',
+      'property.workspace.focusItem1': 'Mettre a jour l occupation et les responsables des unites.',
+      'property.workspace.focusItem2': 'Examiner les charges en attente et les defauts.',
+      'property.workspace.focusItem3': 'Traiter les incidents et ordres de travail ouverts.',
+      'property.workspace.governance': 'Gouvernance',
+      'property.workspace.govItem1': 'Valider la conformite et la documentation en vigueur.',
+      'property.workspace.govItem2': 'Confirmer les regles de facturation avant la cloture.',
+      'property.workspace.govItem3': 'Prioriser les taches critiques de cette semaine.',
+      'property.workspace.focusBullet1': 'Occupation et controle des responsables d unites',
+      'property.workspace.focusBullet2': 'Paiements, factures et suivi des retards',
+      'property.workspace.focusBullet3': 'Maintenance, incidents et conformite',
+      'property.workspace.privateModulesSwitchHint': 'Naviguez entre les modules via le menu superieur. Ici vous suivez les prochaines etapes pour ce bien.',
+      'property.workspace.privateStep1': 'Confirmer les donnees du locataire et la validite du contrat.',
+      'property.workspace.privateStep2': 'Examiner les paiements en attente pour le mois en cours.',
+      'property.workspace.privateStep3': 'Enregistrer les maintenances preventives planifiees.'
     },
     es: {
       'nav.home': 'Inicio',
@@ -2644,11 +2746,46 @@ export class I18nService {
       'maintenance.error.create': 'No se pudo crear la solicitud.',
       'maintenance.error.load': 'No se pudieron cargar las solicitudes.',
       'maintenance.scope.BUILDING': 'Edificio',
-      'maintenance.scope.UNIT_PRIVATE': 'Privado (Unidad)'
+      'maintenance.scope.UNIT_PRIVATE': 'Privado (Unidad)',
+      'property.tabs.gallery.title': 'Galeria de la propiedad',
+      'property.tabs.gallery.photosCount': 'fotos',
+      'property.tabs.gallery.selectFile': 'Seleccionar archivo...',
+      'property.tabs.gallery.uploading': 'Subiendo...',
+      'property.tabs.gallery.upload': 'Subir',
+      'property.tabs.gallery.uploadAsPrimary': 'Subir + Principal',
+      'property.tabs.gallery.primary': 'PRINCIPAL',
+      'property.tabs.gallery.loading': 'Cargando fotos...',
+      'property.tabs.gallery.empty': 'No hay fotos registradas para esta propiedad.',
+      'property.tabs.gallery.setPrimary': 'Establecer como principal',
+      'property.tabs.gallery.delete': 'Eliminar',
+      'property.tabs.gallery.loadError': 'No se pudieron cargar las fotos de la propiedad.',
+      'property.tabs.gallery.uploadSuccess': 'Foto subida con exito.',
+      'property.tabs.gallery.uploadError': 'No se pudo subir la foto.',
+      'property.tabs.gallery.setPrimarySuccess': 'Foto principal actualizada.',
+      'property.tabs.gallery.setPrimaryError': 'No se pudo establecer la foto principal.',
+      'property.tabs.gallery.deleteSuccess': 'Foto eliminada con exito.',
+      'property.tabs.gallery.deleteError': 'No se pudo eliminar la foto.',
+      'property.workspace.modulesSwitchHint': 'Use el menu superior para cambiar entre modulos. Esta seccion muestra solo contexto operativo.',
+      'property.workspace.immediateFocus': 'Enfoque inmediato',
+      'property.workspace.focusItem1': 'Actualizar ocupacion y responsables de las unidades.',
+      'property.workspace.focusItem2': 'Revisar cargos pendientes e incumplimientos.',
+      'property.workspace.focusItem3': 'Gestionar incidentes y ordenes de trabajo abiertas.',
+      'property.workspace.governance': 'Gobernanza',
+      'property.workspace.govItem1': 'Validar cumplimiento y documentacion vigente.',
+      'property.workspace.govItem2': 'Confirmar reglas de facturacion antes del cierre.',
+      'property.workspace.govItem3': 'Priorizar tareas criticas de esta semana.',
+      'property.workspace.focusBullet1': 'Ocupacion y control de responsables de unidades',
+      'property.workspace.focusBullet2': 'Pagos, facturas y seguimiento de vencidos',
+      'property.workspace.focusBullet3': 'Mantenimiento, incidentes y cumplimiento',
+      'property.workspace.privateModulesSwitchHint': 'Navegue entre modulos usando el menu superior. Aqui realiza el seguimiento de los proximos pasos de esta propiedad.',
+      'property.workspace.privateStep1': 'Confirmar datos del inquilino y vigencia contractual.',
+      'property.workspace.privateStep2': 'Revisar pagos pendientes del mes actual.',
+      'property.workspace.privateStep3': 'Registrar mantenimientos preventivos planificados.'
     }
   };
 
   readonly supportedLanguages: LanguageCode[] = ['en', 'pt', 'fr', 'es'];
+  private readonly _lang = signal<LanguageCode>(this.defaultLanguage);
   readonly language$ = new BehaviorSubject<LanguageCode>(this.defaultLanguage);
 
   init(): void {
@@ -2665,11 +2802,12 @@ export class I18nService {
   }
 
   get currentLanguage(): LanguageCode {
-    return this.language$.value;
+    return this._lang();
   }
 
   setLanguage(language: LanguageCode): void {
     const resolved = this.resolveLanguage(language) ?? this.defaultLanguage;
+    this._lang.set(resolved);
     if (resolved !== this.language$.value) {
       this.language$.next(resolved);
     }
@@ -2679,7 +2817,7 @@ export class I18nService {
   }
 
   translate(key: string): string {
-    const current = this.translations[this.currentLanguage]?.[key];
+    const current = this.translations[this._lang()]?.[key];
     if (current) {
       return current;
     }

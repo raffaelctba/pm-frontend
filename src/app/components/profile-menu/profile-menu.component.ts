@@ -1,16 +1,17 @@
 import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { catchError, of } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { KeycloakProfile } from 'keycloak-js';
 import { AuthService } from '../../services/auth.service';
-import { I18nService, LanguageCode } from '../../services/i18n.service';
+import { TranslationService } from '../../services/translation.service';
 import { ThemeMode, UserPreferencesService } from '../../services/user-preferences.service';
 import { environment } from '../../../environments/environment';
+import { LanguageSelectorComponent } from '../language-selector/language-selector.component';
 
 @Component({
   selector: 'app-profile-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LanguageSelectorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="relative" (click)="$event.stopPropagation()">
@@ -70,21 +71,7 @@ import { environment } from '../../../environments/environment';
             </div>
 
             <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ t('nav.language') }}</p>
-              <div class="mt-2 flex flex-wrap gap-2">
-                @for (lang of i18n.supportedLanguages; track lang) {
-                  <button
-                    type="button"
-                    class="rounded-md border px-2 py-1 text-xs"
-                    [class.border-primary-600]="currentLanguage() === lang"
-                    [class.text-primary-700]="currentLanguage() === lang"
-                    [ngClass]="currentLanguage() !== lang ? 'border-slate-300 text-slate-600 dark:border-slate-600 dark:text-slate-300' : ''"
-                    (click)="setLanguage(lang)"
-                  >
-                    {{ t('lang.' + lang) }}
-                  </button>
-                }
-              </div>
+              <app-language-selector />
             </div>
           </div>
 
@@ -98,22 +85,17 @@ import { environment } from '../../../environments/environment';
 })
 export class ProfileMenuComponent {
   private readonly authService = inject(AuthService);
-  readonly i18n = inject(I18nService);
+  readonly i18n = inject(TranslationService);
   readonly preferences = inject(UserPreferencesService);
-  readonly language = toSignal(this.i18n.language$, { initialValue: this.i18n.currentLanguage });
   private readonly avatarStorageKey = 'myproperty.profile.avatar';
 
   readonly menuOpen = signal<boolean>(false);
   readonly avatarDataUrl = signal<string | null>(this.loadStoredAvatar());
   readonly themeModes: ThemeMode[] = ['system', 'light', 'dark'];
-
-  readonly profile = toSignal(
-    this.authService.getUserProfile().pipe(catchError(() => of(null))),
-    { initialValue: null }
-  );
+  readonly profile = signal<KeycloakProfile | null>(null);
 
   constructor() {
-    this.i18n.init();
+    this.authService.getUserProfile().pipe(catchError(() => of(null))).subscribe((profile) => this.profile.set(profile));
   }
 
   @HostListener('document:click')
@@ -123,10 +105,6 @@ export class ProfileMenuComponent {
 
   toggleMenu(): void {
     this.menuOpen.update((open) => !open);
-  }
-
-  setLanguage(language: LanguageCode): void {
-    this.i18n.setLanguage(language);
   }
 
   setTheme(mode: ThemeMode): void {
@@ -203,13 +181,9 @@ export class ProfileMenuComponent {
   }
 
   t(key: string): string {
-    this.language();
     return this.i18n.translate(key);
   }
 
-  currentLanguage(): LanguageCode {
-    return this.language();
-  }
 
   private loadStoredAvatar(): string | null {
     return localStorage.getItem(this.avatarStorageKey);

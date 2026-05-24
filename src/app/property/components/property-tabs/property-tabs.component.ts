@@ -148,8 +148,8 @@ import { getPropertyRoleLabelKey } from '../../../shared/utils/property-role-i18
         <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="mb-5 flex items-center justify-between">
             <div>
-              <h3 class="text-base font-bold text-slate-900">Galeria do imovel</h3>
-              <p class="text-xs text-slate-500">{{ propertyImages().length }} fotos cadastradas</p>
+              <h3 class="text-base font-bold text-slate-900">{{ i18n.translate('property.tabs.gallery.title') }}</h3>
+              <p class="text-xs text-slate-500">{{ propertyImages().length }} {{ i18n.translate('property.tabs.gallery.photosCount') }}</p>
             </div>
             <span class="material-symbols-outlined text-slate-400">photo_library</span>
           </div>
@@ -174,17 +174,17 @@ import { getPropertyRoleLabelKey } from '../../../shared/utils/property-role-i18
                 <div class="relative flex-1 w-full max-w-md">
                   <input type="file" accept="image/*" class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0" (change)="onFileSelected($event)" />
                   <div class="flex h-11 items-center justify-between rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-600">
-                    <span class="truncate">{{ selectedFileName() || 'Selecionar arquivo...' }}</span>
+                    <span class="truncate">{{ selectedFileName() || i18n.translate('property.tabs.gallery.selectFile') }}</span>
                     <span class="material-symbols-outlined text-slate-400">upload_file</span>
                   </div>
                 </div>
                 <div class="flex gap-2">
                   <button type="button" class="btn btn-secondary h-11 px-6" [disabled]="!selectedFile() || uploadInProgress()" (click)="uploadSelectedFile(false)">
-                    {{ uploadInProgress() ? 'Enviando...' : 'Enviar' }}
+                    {{ uploadInProgress() ? i18n.translate('property.tabs.gallery.uploading') : i18n.translate('property.tabs.gallery.upload') }}
                   </button>
                   <button type="button" class="btn btn-primary h-11 px-6 flex items-center gap-2" [disabled]="!selectedFile() || uploadInProgress()" (click)="uploadSelectedFile(true)">
                     <span class="material-symbols-outlined text-sm">star</span>
-                    Enviar + Principal
+                    {{ i18n.translate('property.tabs.gallery.uploadAsPrimary') }}
                   </button>
                 </div>
               </div>
@@ -194,25 +194,25 @@ import { getPropertyRoleLabelKey } from '../../../shared/utils/property-role-i18
           @if (loadingImages()) {
             <div class="flex flex-col items-center justify-center py-12">
                <div class="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600"></div>
-               <p class="mt-3 text-sm text-slate-500">Carregando fotos...</p>
+               <p class="mt-3 text-sm text-slate-500">{{ i18n.translate('property.tabs.gallery.loading') }}</p>
             </div>
           } @else if (propertyImages().length === 0) {
             <div class="flex flex-col items-center justify-center py-12 text-center">
               <span class="material-symbols-outlined text-5xl text-slate-200">no_photography</span>
-              <p class="mt-4 text-sm text-slate-500">Nenhuma foto cadastrada para este imovel.</p>
+              <p class="mt-4 text-sm text-slate-500">{{ i18n.translate('property.tabs.gallery.empty') }}</p>
             </div>
           } @else {
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               @for (image of propertyImages(); track image.id) {
                 <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all hover:border-blue-400 hover:shadow-lg">
                   <div class="aspect-square w-full">
-                    <img class="h-full w-full object-cover" [src]="imageUrl(image)" [alt]="image.description || 'Foto do imovel'" loading="lazy" />
+                    <img class="h-full w-full object-cover" [src]="imageUrl(image)" [alt]="image.description || i18n.translate('property.tabs.gallery.title')" loading="lazy" />
                   </div>
                   
                   @if (image.isPrimary) {
                     <div class="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-blue-600 px-2.5 py-1 text-[10px] font-bold text-white shadow-lg">
                       <span class="material-symbols-outlined text-xs">star</span>
-                      PRINCIPAL
+                      {{ i18n.translate('property.tabs.gallery.primary') }}
                     </div>
                   }
 
@@ -223,14 +223,14 @@ import { getPropertyRoleLabelKey } from '../../../shared/utils/property-role-i18
                         class="w-32 rounded-lg bg-white py-2 text-xs font-bold text-slate-900 shadow-sm transition-transform active:scale-95"
                         [disabled]="image.isPrimary || updatingImageId() === image.id"
                         (click)="setPrimaryImage(image.id)">
-                        Definir Principal
+                        {{ i18n.translate('property.tabs.gallery.setPrimary') }}
                       </button>
                       <button
                         type="button"
                         class="w-32 rounded-lg bg-rose-600 py-2 text-xs font-bold text-white shadow-sm transition-transform active:scale-95"
                         [disabled]="updatingImageId() === image.id"
                         (click)="deleteImage(image.id)">
-                        Excluir
+                        {{ i18n.translate('property.tabs.gallery.delete') }}
                       </button>
                     </div>
                   }
@@ -325,7 +325,7 @@ export class PropertyTabsComponent implements OnChanges {
         this.loadingImages.set(false);
       },
       error: () => {
-        this.imageError.set('Nao foi possivel carregar as fotos do imovel.');
+        this.imageError.set(this.i18n.translate('property.tabs.gallery.loadError'));
         this.loadingImages.set(false);
       }
     });
@@ -354,12 +354,12 @@ export class PropertyTabsComponent implements OnChanges {
         this.uploadInProgress.set(false);
         this.selectedFile.set(null);
         this.selectedFileName.set('');
-        this.imageSuccess.set('Foto enviada com sucesso.');
+        this.imageSuccess.set(this.i18n.translate('property.tabs.gallery.uploadSuccess'));
         this.loadImages();
       },
       error: () => {
         this.uploadInProgress.set(false);
-        this.imageError.set('Nao foi possivel enviar a foto.');
+        this.imageError.set(this.i18n.translate('property.tabs.gallery.uploadError'));
       }
     });
   }
@@ -374,12 +374,12 @@ export class PropertyTabsComponent implements OnChanges {
     this.propertyImageService.setPrimaryImage(this.propertyId, imageId).subscribe({
       next: () => {
         this.updatingImageId.set(null);
-        this.imageSuccess.set('Foto principal atualizada.');
+        this.imageSuccess.set(this.i18n.translate('property.tabs.gallery.setPrimarySuccess'));
         this.loadImages();
       },
       error: () => {
         this.updatingImageId.set(null);
-        this.imageError.set('Nao foi possivel definir a foto principal.');
+        this.imageError.set(this.i18n.translate('property.tabs.gallery.setPrimaryError'));
       }
     });
   }
@@ -394,12 +394,12 @@ export class PropertyTabsComponent implements OnChanges {
     this.propertyImageService.deleteImage(this.propertyId, imageId).subscribe({
       next: () => {
         this.updatingImageId.set(null);
-        this.imageSuccess.set('Foto removida com sucesso.');
+        this.imageSuccess.set(this.i18n.translate('property.tabs.gallery.deleteSuccess'));
         this.loadImages();
       },
       error: () => {
         this.updatingImageId.set(null);
-        this.imageError.set('Nao foi possivel remover a foto.');
+        this.imageError.set(this.i18n.translate('property.tabs.gallery.deleteError'));
       }
     });
   }

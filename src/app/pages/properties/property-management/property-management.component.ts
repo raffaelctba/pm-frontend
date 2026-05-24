@@ -52,9 +52,6 @@ interface LeaseDraft {
             </div>
 
             <div class="flex flex-wrap gap-2">
-              <a [routerLink]="['/property', currentProperty.id, 'edit']" class="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20">
-                {{ i18n.translate('property.workspace.editProperty') }}
-              </a>
               <a routerLink="/properties" class="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10">
                 {{ i18n.translate('property.workspace.backToList') }}
               </a>
@@ -106,24 +103,24 @@ interface LeaseDraft {
               </div>
 
               <div class="mb-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
-                Use o menu superior desta propriedade para alternar entre modulos. Esta secao mostra apenas contexto operacional.
+                {{ i18n.translate('property.workspace.modulesSwitchHint') }}
               </div>
 
               <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div class="rounded-xl border border-slate-200 p-4">
-                  <p class="text-xs uppercase tracking-wide text-slate-500">Foco imediato</p>
+                  <p class="text-xs uppercase tracking-wide text-slate-500">{{ i18n.translate('property.workspace.immediateFocus') }}</p>
                   <ul class="mt-2 space-y-2 text-sm text-slate-700">
-                    <li>• Atualizar ocupacao e responsaveis das unidades.</li>
-                    <li>• Revisar cobrancas pendentes e inadimplencia.</li>
-                    <li>• Tratar incidentes e ordens de servico abertas.</li>
+                    <li>• {{ i18n.translate('property.workspace.focusItem1') }}</li>
+                    <li>• {{ i18n.translate('property.workspace.focusItem2') }}</li>
+                    <li>• {{ i18n.translate('property.workspace.focusItem3') }}</li>
                   </ul>
                 </div>
                 <div class="rounded-xl border border-slate-200 p-4">
-                  <p class="text-xs uppercase tracking-wide text-slate-500">Governanca</p>
+                  <p class="text-xs uppercase tracking-wide text-slate-500">{{ i18n.translate('property.workspace.governance') }}</p>
                   <ul class="mt-2 space-y-2 text-sm text-slate-700">
-                    <li>• Validar compliance e documentacao vigente.</li>
-                    <li>• Confirmar regras de cobranca antes do fechamento.</li>
-                    <li>• Priorizar tarefas criticas desta semana.</li>
+                    <li>• {{ i18n.translate('property.workspace.govItem1') }}</li>
+                    <li>• {{ i18n.translate('property.workspace.govItem2') }}</li>
+                    <li>• {{ i18n.translate('property.workspace.govItem3') }}</li>
                   </ul>
                 </div>
               </div>
@@ -142,9 +139,9 @@ interface LeaseDraft {
                 <div class="rounded-xl bg-white p-4 shadow-sm">
                   <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ i18n.translate('property.workspace.operationsFocus') }}</p>
                   <ul class="mt-2 space-y-2">
-                    <li>• Unit occupancy and assignee control</li>
-                    <li>• Payments, invoices and overdue monitoring</li>
-                    <li>• Maintenance, incidents and compliance</li>
+                    <li>• {{ i18n.translate('property.workspace.focusBullet1') }}</li>
+                    <li>• {{ i18n.translate('property.workspace.focusBullet2') }}</li>
+                    <li>• {{ i18n.translate('property.workspace.focusBullet3') }}</li>
                   </ul>
                 </div>
               </div>
@@ -267,12 +264,12 @@ interface LeaseDraft {
               <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
                 <h2 class="text-xl font-semibold text-slate-900">{{ i18n.translate('property.workspace.privateActions') }}</h2>
                 <p class="mt-3 text-xs text-slate-600">
-                  Navegue pelos modulos usando o menu superior. Aqui voce acompanha os proximos passos deste imovel.
+                  {{ i18n.translate('property.workspace.privateModulesSwitchHint') }}
                 </p>
                 <ul class="mt-4 space-y-3 text-sm text-slate-700">
-                  <li class="rounded-xl border border-slate-200 bg-white px-4 py-3">• Confirmar dados do inquilino e vigencia contratual.</li>
-                  <li class="rounded-xl border border-slate-200 bg-white px-4 py-3">• Revisar pendencias de pagamento do mes atual.</li>
-                  <li class="rounded-xl border border-slate-200 bg-white px-4 py-3">• Registrar manutencoes preventivas planejadas.</li>
+                  <li class="rounded-xl border border-slate-200 bg-white px-4 py-3">• {{ i18n.translate('property.workspace.privateStep1') }}</li>
+                  <li class="rounded-xl border border-slate-200 bg-white px-4 py-3">• {{ i18n.translate('property.workspace.privateStep2') }}</li>
+                  <li class="rounded-xl border border-slate-200 bg-white px-4 py-3">• {{ i18n.translate('property.workspace.privateStep3') }}</li>
                 </ul>
               </div>
 

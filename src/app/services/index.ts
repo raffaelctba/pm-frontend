@@ -8,6 +8,12 @@ export * from './document-template.service';
 export * from './generated-document.service';
 export * from './document-management.service';
 
+// Localization Services
+export * from './config.service';
+export * from './user-profile.service';
+export * from './translation.service';
+export * from './language-detection.util';
+
 // Payment Routing Services
 export * from './payment-routing.service';
 

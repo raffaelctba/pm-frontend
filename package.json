@@ -32,9 +32,9 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "21.1.4",
     "@angular/cli": "21.1.4",
-    "@types/jasmine": "~5.1.4",
-    "@tailwindcss/postcss": "^4.2.0",
     "@angular/compiler-cli": "21.1.4",
+    "@tailwindcss/postcss": "^4.2.0",
+    "@types/jasmine": "~5.1.4",
     "@types/sockjs-client": "^1.5.4",
     "autoprefixer": "^10.4.24",
     "jasmine-core": "~5.9.0",

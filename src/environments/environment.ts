@@ -1,9 +1,9 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:8081',
+  apiBaseUrl: 'https://api.mybuilding.ca',
   wsBaseUrl: 'http://localhost:8081',
-  keycloakUrl: 'http://localhost:8083',
-  keycloakRealm: 'mybuilding',
-  keycloakClientId: 'mybuilding-angular-frontend'
+  keycloakUrl: 'https://auth.mybuilding.ca',
+  keycloakRealm: 'myproperty',
+  keycloakClientId: 'myproperty-angular-frontend'
 };
 

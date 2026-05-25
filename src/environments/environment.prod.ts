@@ -4,7 +4,8 @@ export const environment = {
   wsBaseUrl: '__WS_BASE_URL__',
   keycloakUrl: '__KEYCLOAK_URL__',
   keycloakRealm: 'myproperty',
-  keycloakClientId: 'myproperty-angular-frontend'
+  keycloakClientId: 'myproperty-angular-frontend',
+  frontendCommit: '__FRONTEND_BUILD_COMMIT__'
 };
 
 

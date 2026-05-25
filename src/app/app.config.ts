@@ -13,9 +13,10 @@ import { localeInterceptor } from './interceptors/locale.interceptor';
 import { environment } from '../environments/environment';
 import { TranslationService } from './services/translation.service';
 
-// Match all API requests to the configured backend server (required for Keycloak bearer token)
+// Only attach bearer tokens to authenticated backend routes.
+// Keep public auth/signup/preauth/invitation endpoints anonymous to avoid 401/redirect loops.
 const backendApiPattern = new RegExp(
-  `^${environment.apiBaseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\/api\\/.*`
+  `^${environment.apiBaseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\/api\\/(?!auth\\/(?:signup|preauth(?:\\/verify)?|invitations)|config\\/build-info(?:\\/|$)).*`
 );
 
 export const appConfig: ApplicationConfig = {

@@ -48,7 +48,7 @@ function shouldHandleRequest(url: string): boolean {
   }
 
   // Keep signup endpoint public and avoid auth redirect loops there.
-  return !url.includes('/api/auth/signup');
+  return !url.includes('/api/auth/signup') && !url.includes('/api/auth/preauth') && !url.includes('/api/config/build-info');
 }
 
 

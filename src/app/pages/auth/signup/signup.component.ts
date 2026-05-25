@@ -31,7 +31,28 @@ import { InvitationInfoResponse } from '../../../models/auth.model';
         </div>
       }
 
-      <form [formGroup]="signupForm" (ngSubmit)="submit()" class="mt-6 space-y-4">
+      <!-- Step 1: single field (email or phone) -->
+      <div *ngIf="step === 'contact'" class="mt-6">
+        <label class="label" for="contact">Email or phone</label>
+        <div class="flex gap-2">
+          <input id="contact" #contactInput class="input flex-1" type="text" />
+          <button class="btn btn-primary" (click)="begin(contactInput.value)">Continue</button>
+        </div>
+        <p *ngIf="errorMessage" class="mt-3 text-sm text-red-600">{{ errorMessage }}</p>
+      </div>
+
+      <!-- Step 2: verification for email/phone -->
+      <div *ngIf="step === 'verify'" class="mt-6">
+        <p class="text-sm text-slate-600">A verification code was sent to {{ currentContact }}. Enter the code below to continue.</p>
+        <div class="flex gap-2 mt-3">
+          <input id="code" #codeInput class="input" type="text" />
+          <button class="btn btn-primary" (click)="verifyCode(codeInput.value)">Verify</button>
+        </div>
+        <p *ngIf="errorMessage" class="mt-3 text-sm text-red-600">{{ errorMessage }}</p>
+      </div>
+
+      <!-- Step 3: full signup form -->
+      <form *ngIf="step === 'full'" [formGroup]="signupForm" (ngSubmit)="submit()" class="mt-6 space-y-4">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label class="label" for="firstName">First name</label>
@@ -50,7 +71,7 @@ import { InvitationInfoResponse } from '../../../models/auth.model';
 
         <div>
           <label class="label" for="email">Email</label>
-          <input id="email" class="input" type="email" formControlName="email" [readonly]="emailLocked" />
+          <input id="email" class="input" type="email" formControlName="email" [readonly]="emailLocked || signupForm.controls.email.disabled" />
           <p *ngIf="emailTouchedAndInvalid" class="mt-1 text-xs text-red-600">Valid email is required.</p>
           <p *ngIf="emailLocked" class="mt-1 text-xs text-slate-500">This email comes from your invitation.</p>
         </div>
@@ -100,6 +121,8 @@ export class SignupComponent implements OnInit {
   invitationInfo: InvitationInfoResponse | null = null;
   invitationToken = '';
   emailLocked = false;
+  step: 'contact' | 'verify' | 'full' = 'contact';
+  currentContact = '';
 
   readonly signupForm;
 
@@ -138,6 +161,7 @@ export class SignupComponent implements OnInit {
           this.signupForm.controls.email.setValue(info.inviteeEmail ?? '');
           this.signupForm.controls.email.disable({ emitEvent: false });
           this.emailLocked = true;
+          this.step = 'full';
           this.invitationLoading = false;
         },
         error: (error) => {
@@ -146,6 +170,57 @@ export class SignupComponent implements OnInit {
           this.emailLocked = false;
         }
       });
+    });
+  }
+
+  begin(contactValue: string): void {
+    this.errorMessage = '';
+    const contact = (contactValue ?? '').trim();
+
+    if (!contact) {
+      this.errorMessage = 'Please enter an email or phone number.';
+      return;
+    }
+
+    this.currentContact = contact;
+
+    this.authService.startPreauth(contact).subscribe({
+      next: () => {
+        this.step = 'verify';
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.message ?? 'Could not start verification. Please try again.';
+      }
+    });
+  }
+
+  verifyCode(codeValue: string): void {
+    this.errorMessage = '';
+    const code = (codeValue ?? '').trim();
+
+    if (!this.currentContact || !code) {
+      this.errorMessage = 'Contact and code are required.';
+      return;
+    }
+
+    this.authService.verifyPreauth(this.currentContact, code).subscribe({
+      next: () => {
+        if (!this.emailLocked && this.currentContact.includes('@')) {
+          this.signupForm.controls.email.setValue(this.currentContact);
+        } else if (!this.emailLocked) {
+          const syntheticEmail = `${this.currentContact.replace(/[^a-zA-Z0-9]/g, '')}@phone.myproperty`;
+          this.signupForm.controls.email.setValue(syntheticEmail);
+        }
+
+        if (!this.currentContact.includes('@')) {
+          this.signupForm.controls.phone.setValue(this.currentContact);
+        }
+
+        this.step = 'full';
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.message ?? 'Invalid or expired verification code.';
+      }
     });
   }
 

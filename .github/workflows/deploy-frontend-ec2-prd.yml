@@ -33,10 +33,12 @@ jobs:
           API_BASE_URL: ${{ vars.apiBaseUrl }}
           WS_BASE_URL: ${{ vars.wsBaseUrl }}
           KEYCLOAK_URL: ${{ vars.keycloakUrl }}
+          FRONTEND_BUILD_COMMIT: ${{ github.sha }}
         run: |
           sed -i "s|__API_BASE_URL__|$API_BASE_URL|g" src/environments/environment.prod.ts
           sed -i "s|__WS_BASE_URL__|$WS_BASE_URL|g" src/environments/environment.prod.ts
           sed -i "s|__KEYCLOAK_URL__|$KEYCLOAK_URL|g" src/environments/environment.prod.ts
+          sed -i "s|__FRONTEND_BUILD_COMMIT__|$FRONTEND_BUILD_COMMIT|g" src/environments/environment.prod.ts
           echo "✅ environment.prod.ts after substitution:"
           cat src/environments/environment.prod.ts
 

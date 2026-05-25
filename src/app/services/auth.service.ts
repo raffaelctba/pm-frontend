@@ -11,6 +11,8 @@ import { InvitationInfoResponse, SignupRequest, SignupResponse } from '../models
 export class AuthService {
   private readonly signupApiUrl = `${environment.apiBaseUrl}/api/auth/signup`;
   private readonly invitationApiUrl = `${environment.apiBaseUrl}/api/auth/invitations`;
+  private readonly preauthApiUrl = `${environment.apiBaseUrl}/api/auth/preauth`;
+  private readonly preauthVerifyApiUrl = `${environment.apiBaseUrl}/api/auth/preauth/verify`;
 
   constructor(
     private keycloak: Keycloak,
@@ -53,6 +55,14 @@ export class AuthService {
 
   signUp(payload: SignupRequest): Observable<SignupResponse> {
     return this.http.post<SignupResponse>(this.signupApiUrl, payload);
+  }
+
+  startPreauth(contact: string): Observable<any> {
+    return this.http.post(this.preauthApiUrl, { contact });
+  }
+
+  verifyPreauth(contact: string, code: string): Observable<any> {
+    return this.http.post(this.preauthVerifyApiUrl, { contact, code });
   }
 
   getInvitationInfo(token: string): Observable<InvitationInfoResponse> {

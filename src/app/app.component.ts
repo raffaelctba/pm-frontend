@@ -8,6 +8,8 @@ import { NotificationCenterService } from './services/notification-center.servic
 import { DashboardContextService } from './services/dashboard-context.service';
 import { PropertyService } from './services/property.service';
 import { UserPreferencesService } from './services/user-preferences.service';
+import { BuildInfoService } from './services/build-info.service';
+import { environment } from '../environments/environment';
 import { SessionToastComponent } from './components/session-toast/session-toast.component';
 import { ProfileMenuComponent } from './components/profile-menu/profile-menu.component';
 import { BreadcrumbComponent } from './navigation/components/breadcrumb/breadcrumb.component';
@@ -117,11 +119,24 @@ import { TopMenuComponent } from './navigation/components/top-menu/top-menu.comp
       <main class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
         <router-outlet></router-outlet>
       </main>
+
+      <footer class="border-t border-slate-200 bg-white/80 px-4 py-3 text-center text-xs text-slate-500 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80 dark:text-slate-400">
+        <ng-container *ngIf="buildInfo$ | async as buildInfo; else loadingBuildInfo">
+          <span>
+            Build {{ buildInfo.version }} · backend commit {{ buildInfo.commit }} · frontend commit {{ environment.frontendCommit }} · {{ buildInfo.builtAt }}
+          </span>
+        </ng-container>
+        <ng-template #loadingBuildInfo>
+          <span>Loading backend build info… frontend commit {{ environment.frontendCommit }}</span>
+        </ng-template>
+      </footer>
     </div>
   `
 })
 export class AppComponent {
   readonly notificationPanelOpen = signal(false);
+  readonly buildInfo$;
+  readonly environment = environment;
   private propertyMetadataLoadId: number | null = null;
 
   constructor(
@@ -131,8 +146,10 @@ export class AppComponent {
     public i18n: TranslationService,
     public dashboardContext: DashboardContextService,
     private readonly propertyService: PropertyService,
-    private readonly userPreferences: UserPreferencesService
+    private readonly userPreferences: UserPreferencesService,
+    private readonly buildInfoService: BuildInfoService
   ) {
+    this.buildInfo$ = this.buildInfoService.getBuildInfo();
     // Force early preferences service initialization so dark mode class is applied globally.
     this.userPreferences.themeMode();
     this.syncPropertyRouteContext();

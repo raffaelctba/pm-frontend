@@ -4,5 +4,6 @@ export const environment = {
   wsBaseUrl: 'http://localhost:8081',
   keycloakUrl: 'https://auth.mybuilding.ca',
   keycloakRealm: 'myproperty-dev',
-  keycloakClientId: 'myproperty-angular-frontend'
+  keycloakClientId: 'myproperty-angular-frontend',
+  frontendCommit: 'unknown'
 };
